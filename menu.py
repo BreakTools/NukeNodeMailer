@@ -35,9 +35,11 @@ def create_mailer_menu() -> None:
         )
 
 
-def start_mailing_background_processes() -> None:
+def start_node_mailer() -> None:
     """Starts background processes for the Node Mailer."""
-    pass
+    global node_mailer_controller
+    node_mailer_controller = node_mailer.controller.NodeMailerController()
 
 
 create_mailer_menu()
+start_node_mailer()
