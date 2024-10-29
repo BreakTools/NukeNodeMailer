@@ -1,4 +1,4 @@
-"""Functions that handle auto discovery of other Node Mailer instances on the local network using UDP broadcasting.
+"""Code that handles auto discovery of other Node Mailer instances on the local network using UDP broadcasting.
 
 Written by Mervin van Brakel, 2024."""
 
@@ -20,26 +20,41 @@ class MailingClientsDiscovery(QtCore.QObject):
         """Initializes the MailingClientsDiscovery class."""
         self.mailing_clients: List[NodeMailerClient] = []
 
-        self.initialize_sockets()
+        self.local_addresses = self.get_local_ip_addresses()
+        self.initialize_socket()
 
         self.broadcast_message = self.get_broadcast_message()
         self.start_infinitely_broadcasting()
 
-    def initialize_sockets(self) -> None:
+    def get_local_ip_addresses(self) -> List[str]:
+        """Returns the local IP addresses of the machine. It's a list because some machines have
+        multiple local IP addresses (like VPNs and stuff) and I don't know how to find the relevant one lol.
+
+        Returns:
+            The local IP addresses of the machine.
+        """
+        localhost = QtNetwork.QHostAddress(QtNetwork.QHostAddress.LocalHost)
+        return [
+            address.toString()
+            for address in QtNetwork.QNetworkInterface.allAddresses()
+            if address.protocol() == QtNetwork.QAbstractSocket.IPv4Protocol
+            and address != localhost
+        ]
+
+    def initialize_socket(self) -> None:
         """Initializes the sockets and connects their signals."""
         self.udp_socket = QtNetwork.QUdpSocket()
         self.udp_socket.bind(
             QtNetwork.QHostAddress(QtNetwork.QHostAddress.AnyIPv4),
             constants.Ports.BROADCAST.value,
         )
-
         self.udp_socket.readyRead.connect(self.on_datagram_received)
 
     def get_broadcast_message(self) -> str:
         """Returns the message that should be broadcasted to other Nuke instances.
 
         Returns:
-            str: The broadcast message.
+            The broadcast message.
         """
         login_name = os.getlogin()
         return json.dumps({"type": "node_mailer_instance", "name": login_name})
@@ -65,28 +80,28 @@ class MailingClientsDiscovery(QtCore.QObject):
         while self.udp_socket.hasPendingDatagrams():
             datagram = self.udp_socket.receiveDatagram()
 
+            if not self.should_datagram_be_processed(datagram):
+                continue
+
             parsed_data = json.loads(datagram.data().data().decode("utf-8"))
 
-            self.process_received_client_message(
-                parsed_data, datagram.senderAddress().toString()
+            self.mailing_clients.append(
+                NodeMailerClient(
+                    parsed_data["name"], datagram.senderAddress().toString()
+                )
             )
 
-    def process_received_client_message(self, message: dict, ip_address: str) -> None:
-        """Processes a received message from a client and stores it.
+    def should_datagram_be_processed(
+        self, datagram: QtNetwork.QNetworkDatagram
+    ) -> bool:
+        """Checks if the datagram should be processed.
 
         Args:
-            message: The message that was received.
-            ip_address: The IP address of the client that sent the message.
+            datagram: The datagram to check.
         """
-        if message.get("type") != "node_mailer_instance":
-            return
+        ip_address = datagram.senderAddress().toString()
 
-        if message.get("name") == os.getlogin():
-            return
+        if ip_address in self.local_addresses:
+            return False
 
-        for client in self.mailing_clients:
-            if client.ip_address == ip_address:
-                return
-
-        self.mailing_clients.append(NodeMailerClient(message.get("name"), ip_address))
-        print(self.mailing_clients)
+        return all(client.ip_address != ip_address for client in self.mailing_clients)
