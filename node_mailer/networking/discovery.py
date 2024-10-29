@@ -27,15 +27,13 @@ class MailingClientsDiscovery(QtCore.QObject):
 
     def initialize_sockets(self) -> None:
         """Initializes the sockets and connects their signals."""
-        self.receiving_socket = QtNetwork.QUdpSocket()
-        self.receiving_socket.bind(
+        self.udp_socket = QtNetwork.QUdpSocket()
+        self.udp_socket.bind(
             QtNetwork.QHostAddress(QtNetwork.QHostAddress.AnyIPv4),
             constants.Ports.BROADCAST.value,
         )
 
-        self.receiving_socket.readyRead.connect(self.on_datagram_received)
-
-        self.sending_socket = QtNetwork.QUdpSocket()
+        self.udp_socket.readyRead.connect(self.on_datagram_received)
 
     def get_broadcast_message(self) -> str:
         """Returns the message that should be broadcasted to other Nuke instances.
@@ -55,7 +53,7 @@ class MailingClientsDiscovery(QtCore.QObject):
 
     def broadcast_presence(self) -> None:
         """Broadcasts the presence of the Nuke instance on the local network."""
-        self.sending_socket.writeDatagram(
+        self.udp_socket.writeDatagram(
             QtCore.QByteArray(self.broadcast_message.encode("utf-8")),
             QtNetwork.QHostAddress.Broadcast,
             constants.Ports.BROADCAST.value,
@@ -64,8 +62,8 @@ class MailingClientsDiscovery(QtCore.QObject):
     def on_datagram_received(self) -> None:
         """Callback for when a datagram is received. Tries to parse the data and
         calls the process function for processing."""
-        while self.receiving_socket.hasPendingDatagrams():
-            datagram = self.receiving_socket.receiveDatagram()
+        while self.udp_socket.hasPendingDatagrams():
+            datagram = self.udp_socket.receiveDatagram()
 
             parsed_data = json.loads(datagram.data().data().decode("utf-8"))
 
@@ -91,3 +89,4 @@ class MailingClientsDiscovery(QtCore.QObject):
                 return
 
         self.mailing_clients.append(NodeMailerClient(message.get("name"), ip_address))
+        print(self.mailing_clients)
