@@ -99,13 +99,13 @@ class MailingClientsDiscovery(QtCore.QObject):
             return
 
         try:
-            self.mailing_clients.append(
-                NodeMailerClient(
-                    parsed_data["name"], datagram.senderAddress().toString()
-                )
-            )
+            instance_name = parsed_data["name"]
         except KeyError:
             return
+
+        self.mailing_clients.append(
+            NodeMailerClient(instance_name, datagram.senderAddress().toString())
+        )
 
     def should_datagram_be_processed(
         self, datagram: QtNetwork.QNetworkDatagram
