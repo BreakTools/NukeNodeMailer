@@ -2,7 +2,7 @@ import os
 
 import nuke
 
-import node_mailer  # noqa: F401
+import node_mailer
 
 
 def create_mailer_menu() -> None:

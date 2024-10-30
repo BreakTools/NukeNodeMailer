@@ -16,7 +16,7 @@ class MailingClientsDiscovery(QtCore.QObject):
     """Class that handles discovery and storage of other Node Mailer clients.
     Uses UDP broadcasting to find other instances on the local network."""
 
-    def __init__(self):
+    def __init__(self, start_broadcasting=True):
         """Initializes the MailingClientsDiscovery class."""
         self.mailing_clients: List[NodeMailerClient] = []
 
@@ -24,7 +24,9 @@ class MailingClientsDiscovery(QtCore.QObject):
         self.initialize_socket()
 
         self.broadcast_message = self.get_broadcast_message()
-        self.start_infinitely_broadcasting()
+
+        if start_broadcasting:
+            self.start_infinitely_broadcasting()
 
     def get_local_ip_addresses(self) -> List[str]:
         """Returns the local IP addresses of the machine. It's a list because some machines have
@@ -42,7 +44,7 @@ class MailingClientsDiscovery(QtCore.QObject):
         ]
 
     def initialize_socket(self) -> None:
-        """Initializes the sockets and connects their signals."""
+        """Initializes the socket and connects the signals."""
         self.udp_socket = QtNetwork.QUdpSocket()
         self.udp_socket.bind(
             QtNetwork.QHostAddress(QtNetwork.QHostAddress.AnyIPv4),
@@ -83,13 +85,27 @@ class MailingClientsDiscovery(QtCore.QObject):
             if not self.should_datagram_be_processed(datagram):
                 continue
 
-            parsed_data = json.loads(datagram.data().data().decode("utf-8"))
+            self.process_datagram(datagram)
 
+    def process_datagram(self, datagram: QtNetwork.QNetworkDatagram) -> None:
+        """Processes the datagram and adds the client to the mailing_clients list.
+
+        Args:
+            datagram: The datagram to process.
+        """
+        try:
+            parsed_data = json.loads(datagram.data().data().decode("utf-8"))
+        except json.JSONDecodeError:
+            return
+
+        try:
             self.mailing_clients.append(
                 NodeMailerClient(
                     parsed_data["name"], datagram.senderAddress().toString()
                 )
             )
+        except KeyError:
+            return
 
     def should_datagram_be_processed(
         self, datagram: QtNetwork.QNetworkDatagram
