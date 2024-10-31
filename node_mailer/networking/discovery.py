@@ -12,12 +12,12 @@ from node_mailer import constants
 from node_mailer.models.data_models import NodeMailerClient
 
 
-class MailingClientsDiscovery(QtCore.QObject):
+class ClientDiscoveryModel(QtCore.QAbstractListModel):
     """Class that handles discovery and storage of other Node Mailer clients.
     Uses UDP broadcasting to find other instances on the local network."""
 
     def __init__(self):
-        """Initializes the MailingClientsDiscovery class."""
+        """Initializes the model class."""
         self.mailing_clients: List[NodeMailerClient] = []
 
         self.local_addresses = self.get_local_ip_addresses()

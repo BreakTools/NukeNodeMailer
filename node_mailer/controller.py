@@ -5,7 +5,7 @@ Written by Mervin van Brakel, 2024."""
 
 from PySide2 import QtCore
 
-from .networking.discovery import MailingClientsDiscovery
+from .networking.discovery import ClientDiscoveryModel
 
 
 class NodeMailerController:
@@ -13,7 +13,7 @@ class NodeMailerController:
 
     def __init__(self):
         print("[BreakTools] Starting Node Mailer background service...")
-        self.start_background_tasks()
+        self.initialize_models()
 
-    def start_background_tasks(self) -> None:
-        self.discovery = MailingClientsDiscovery()
+    def initialize_models(self) -> None:
+        self.discovery_model = ClientDiscoveryModel()

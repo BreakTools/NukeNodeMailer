@@ -6,12 +6,12 @@ from PySide2 import QtNetwork
 
 from node_mailer import constants
 from node_mailer.models.data_models import NodeMailerClient
-from node_mailer.networking.discovery import MailingClientsDiscovery
+from node_mailer.networking.discovery import ClientDiscoveryModel
 
 
 def test_get_local_ip_addresses():
     """Test to make sure we only get proper local IPv4 addresses."""
-    discovery = MailingClientsDiscovery()
+    discovery = ClientDiscoveryModel()
     with patch(
         "PySide2.QtNetwork.QNetworkInterface.allAddresses",
         return_value=[
@@ -28,7 +28,7 @@ def test_get_local_ip_addresses():
 
 def test_get_broadcast_message():
     """Test the broadcast message."""
-    discovery = MailingClientsDiscovery()
+    discovery = ClientDiscoveryModel()
     with patch("os.getlogin", return_value="test_user"):
         assert (
             discovery.get_broadcast_message()
@@ -38,7 +38,7 @@ def test_get_broadcast_message():
 
 def test_broadcast_presence(qtbot):
     """Tests that the UDP broadcast data is properly sent."""
-    discovery = MailingClientsDiscovery()
+    discovery = ClientDiscoveryModel()
     discovery.broadcast_message = (
         '{"type": "node_mailer_instance", "name": "test_user"}'
     )
@@ -61,7 +61,7 @@ def test_broadcast_presence(qtbot):
 
 def test_process_datagram():
     """Tests the datagram is properly processed."""
-    discovery = MailingClientsDiscovery()
+    discovery = ClientDiscoveryModel()
     mock_datagram = MagicMock()
 
     # Supposed to fail silently
@@ -89,7 +89,7 @@ def test_process_datagram():
 
 def test_should_datagram_be_processed():
     """Test to check if the datagram should be processed."""
-    discovery = MailingClientsDiscovery()
+    discovery = ClientDiscoveryModel()
     discovery.local_addresses = ["192.168.0.22"]
     discovery.mailing_clients = [
         NodeMailerClient("local_computer", "192.168.0.22"),
