@@ -1,17 +1,17 @@
-"""Tests for the code that handles auto discovery of other running Nuke instances on the network.
-For now I skip the actual testing of sent UDP packets here because I haven't figured out how to do that yet."""
+"""Tests for the code that handles auto discovery of other running Nuke instances on the network."""
 
 from unittest.mock import MagicMock, patch
 
 from PySide2 import QtNetwork
 
+from node_mailer import constants
 from node_mailer.models.data_models import NodeMailerClient
 from node_mailer.networking.discovery import MailingClientsDiscovery
 
 
 def test_get_local_ip_addresses():
     """Test to make sure we only get proper local IPv4 addresses."""
-    discovery = MailingClientsDiscovery(start_broadcasting=False)
+    discovery = MailingClientsDiscovery()
     with patch(
         "PySide2.QtNetwork.QNetworkInterface.allAddresses",
         return_value=[
@@ -28,7 +28,7 @@ def test_get_local_ip_addresses():
 
 def test_get_broadcast_message():
     """Test the broadcast message."""
-    discovery = MailingClientsDiscovery(start_broadcasting=False)
+    discovery = MailingClientsDiscovery()
     with patch("os.getlogin", return_value="test_user"):
         assert (
             discovery.get_broadcast_message()
@@ -36,9 +36,32 @@ def test_get_broadcast_message():
         )
 
 
+def test_broadcast_presence(qtbot):
+    """Tests that the UDP broadcast data is properly sent."""
+    discovery = MailingClientsDiscovery()
+    discovery.broadcast_message = (
+        '{"type": "node_mailer_instance", "name": "test_user"}'
+    )
+    discovery.udp_socket.abort()
+
+    test_listening_socket = QtNetwork.QUdpSocket()
+    test_listening_socket.bind(
+        QtNetwork.QHostAddress(QtNetwork.QHostAddress.AnyIPv4),
+        constants.Ports.BROADCAST.value,
+    )
+
+    with qtbot.waitSignal(test_listening_socket.readyRead, timeout=10000) as blocker:
+        discovery.start_infinitely_broadcasting()
+
+    while test_listening_socket.hasPendingDatagrams():
+        datagram = test_listening_socket.receiveDatagram()
+
+    assert datagram.data().data().decode("utf-8") == discovery.broadcast_message
+
+
 def test_process_datagram():
     """Tests the datagram is properly processed."""
-    discovery = MailingClientsDiscovery(start_broadcasting=False)
+    discovery = MailingClientsDiscovery()
     mock_datagram = MagicMock()
 
     # Supposed to fail silently
@@ -66,7 +89,7 @@ def test_process_datagram():
 
 def test_should_datagram_be_processed():
     """Test to check if the datagram should be processed."""
-    discovery = MailingClientsDiscovery(start_broadcasting=False)
+    discovery = MailingClientsDiscovery()
     discovery.local_addresses = ["192.168.0.22"]
     discovery.mailing_clients = [
         NodeMailerClient("local_computer", "192.168.0.22"),

@@ -16,17 +16,14 @@ class MailingClientsDiscovery(QtCore.QObject):
     """Class that handles discovery and storage of other Node Mailer clients.
     Uses UDP broadcasting to find other instances on the local network."""
 
-    def __init__(self, start_broadcasting=True):
+    def __init__(self):
         """Initializes the MailingClientsDiscovery class."""
         self.mailing_clients: List[NodeMailerClient] = []
 
         self.local_addresses = self.get_local_ip_addresses()
-        self.initialize_socket()
-
         self.broadcast_message = self.get_broadcast_message()
 
-        if start_broadcasting:
-            self.start_infinitely_broadcasting()
+        self.initialize_socket()
 
     def get_local_ip_addresses(self) -> List[str]:
         """Returns the local IP addresses of the machine. It's a list because some machines have
