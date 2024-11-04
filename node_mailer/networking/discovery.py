@@ -18,6 +18,7 @@ class ClientDiscoveryModel(QtCore.QAbstractListModel):
 
     def __init__(self):
         """Initializes the model class."""
+        super().__init__()
         self.mailing_clients: List[NodeMailerClient] = []
 
         self.local_addresses = self.get_local_ip_addresses()
