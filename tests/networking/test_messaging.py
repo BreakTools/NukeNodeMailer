@@ -28,6 +28,7 @@ def test_on_message_received(qtbot):
         tcp_socket.disconnectFromHost()
 
     assert blocker.args[0] == test_message
+    messaging_handler.tcp_server.close()
 
 
 def test_get_mailer_message_from_string():

@@ -24,7 +24,10 @@ class DirectMessagingHandler(QtCore.QObject):
 
     def start_listening(self) -> None:
         """Starts listening for incoming messages."""
-        self.tcp_server.listen(port=constants.Ports.MESSAGING.value)
+        self.tcp_server.listen(
+            address=QtNetwork.QHostAddress.AnyIPv4,
+            port=constants.Ports.MESSAGING.value,
+        )
 
     def on_new_connection(self) -> None:
         """Connects the readyRead signal to the on_message_received slot for new connections."""
@@ -71,7 +74,7 @@ class DirectMessagingHandler(QtCore.QObject):
         tcp_socket = QtNetwork.QTcpSocket()
         tcp_socket.connectToHost(client.ip_address, constants.Ports.MESSAGING.value)
 
-        tcp_socket.waitForConnected()
+        tcp_socket.waitForConnected(2000)
         tcp_socket.write(message.as_json().encode("utf-8"))
         tcp_socket.waitForBytesWritten()
         tcp_socket.disconnectFromHost()

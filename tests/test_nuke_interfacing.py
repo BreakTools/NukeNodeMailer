@@ -1,10 +1,12 @@
 """Tests for the Nuke interfacing functions of Node Mailer."""
 
+import base64
+
 import nuke
 
 from node_mailer.nuke_interfacing import (
-    get_selected_nodes_as_string,
-    paste_nodes_from_string,
+    get_selected_nodes_as_encoded_string,
+    paste_nodes_from_encoded_string,
 )
 
 
@@ -16,7 +18,8 @@ def test_get_selected_nodes_as_string():
     for node in nuke.allNodes():
         node["selected"].setValue(True)
 
-    node_string = get_selected_nodes_as_string()
+    node_string = get_selected_nodes_as_encoded_string()
+    node_string = base64.b64decode(node_string.encode("ascii")).decode("ascii")
     assert node_string.startswith("set cut_paste_input")
     assert "Constant" in node_string
     assert "Text1" in node_string
@@ -57,7 +60,8 @@ def test_paste_nodes_from_string():
     xpos -88
     ypos -136
     }"""
-    paste_nodes_from_string(test_string)
+    encoded_test_string = base64.b64encode(test_string.encode("ascii")).decode("ascii")
+    paste_nodes_from_encoded_string(encoded_test_string)
 
     assert nuke.toNode("Constant1")
     assert nuke.toNode("Text1")
