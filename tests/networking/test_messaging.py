@@ -15,7 +15,7 @@ def test_on_message_received(qtbot):
     messaging_handler = DirectMessagingHandler()
     messaging_handler.start_listening()
     test_message = NodeMailerMessage(
-        "test_user", "test_description", "test_node_string"
+        "test_user", "test_description", "test_node_string", 0
     )
 
     with qtbot.waitSignal(messaging_handler.message_received, timeout=1000) as blocker:
@@ -39,11 +39,11 @@ def test_get_mailer_message_from_string():
     with pytest.raises(json.JSONDecodeError):
         messaging_handler.get_mailer_message_from_string(message_string)
 
-    message_string = '{"sender_name": "test_user", "description": "test_description", "node_string": "test_node_string"}'
+    message_string = '{"sender_name": "test_user", "description": "test_description", "node_string": "test_node_string", "timestamp": 0}'
 
     assert messaging_handler.get_mailer_message_from_string(
         message_string
-    ) == NodeMailerMessage("test_user", "test_description", "test_node_string")
+    ) == NodeMailerMessage("test_user", "test_description", "test_node_string", 0)
 
 
 def test_send_message(qtbot):
@@ -51,7 +51,7 @@ def test_send_message(qtbot):
     messaging_handler = DirectMessagingHandler()
     mailer_client = NodeMailerClient("test_user", "localhost")
     test_message = NodeMailerMessage(
-        "test_user", "test_description", "test_node_string"
+        "test_user", "test_description", "test_node_string", 0
     )
     test_server = QtNetwork.QTcpServer()
     test_server.listen(port=constants.Ports.MESSAGING.value)
@@ -65,5 +65,5 @@ def test_send_message(qtbot):
 
     message = client.readAll()
     assert message == QtCore.QByteArray(
-        b'{"sender_name": "test_user", "description": "test_description", "node_string": "test_node_string"}'
+        b'{"sender_name": "test_user", "description": "test_description", "node_string": "test_node_string", "timestamp": 0}'
     )

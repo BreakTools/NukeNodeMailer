@@ -56,11 +56,7 @@ class DirectMessagingHandler(QtCore.QObject):
             The NodeMailerMessage object.
         """
         parsed_message = json.loads(message_string)
-        return NodeMailerMessage(
-            parsed_message["sender_name"],
-            parsed_message["description"],
-            parsed_message["node_string"],
-        )
+        return NodeMailerMessage(**parsed_message)
 
     def send_message(
         self, client: NodeMailerClient, message: NodeMailerMessage

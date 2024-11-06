@@ -3,7 +3,7 @@
 Written by Mervin van Brakel, 2024."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 
 @dataclass
@@ -21,13 +21,8 @@ class NodeMailerMessage:
     sender_name: str
     description: str
     node_string: str
+    timestamp: int
 
     def as_json(self) -> str:
         """Returns the message as a JSON string."""
-        return json.dumps(
-            {
-                "sender_name": self.sender_name,
-                "description": self.description,
-                "node_string": self.node_string,
-            }
-        )
+        return json.dumps(asdict(self))
