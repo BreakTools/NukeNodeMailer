@@ -15,7 +15,7 @@ class NodeMailerClient:
 
 
 @dataclass
-class NodeMailerMessage:
+class NodeMailerMail:
     """A message that is sent between two node mailer clients."""
 
     sender_name: str
