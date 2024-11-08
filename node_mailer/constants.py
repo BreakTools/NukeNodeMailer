@@ -10,3 +10,9 @@ class Ports(Enum):
 
     BROADCAST = 37220
     MESSAGING = 37221
+
+
+class SettingStrings(Enum):
+    """Enum that stores setting strings for use with QSettings."""
+
+    FAVORITES = "node_mailer/favorites"

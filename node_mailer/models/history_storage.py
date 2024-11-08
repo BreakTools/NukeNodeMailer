@@ -4,7 +4,7 @@ Written by Mervin van Brakel, 2024."""
 
 import sqlite3
 from pathlib import Path
-from typing import List
+from typing import List, Any
 
 from PySide2 import QtCore
 
@@ -97,7 +97,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         )
         self.database.commit()
 
-    def data(self, index, role):
+    def data(self, index: QtCore.QModelIndex, role: Any):
         """Returns the data for the given index and role for use in the UI."""
         if role != QtCore.Qt.DisplayRole:
             return None

@@ -12,6 +12,7 @@ class NodeMailerClient:
 
     name: str
     ip_address: str
+    favorite: bool
 
 
 @dataclass

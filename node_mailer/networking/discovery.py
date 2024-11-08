@@ -4,9 +4,9 @@ Written by Mervin van Brakel, 2024."""
 
 import json
 import os
-from typing import List
+from typing import Any, List, Union
 
-from PySide2 import QtCore, QtNetwork
+from PySide2 import QtCore, QtGui, QtNetwork
 
 from node_mailer import constants
 from node_mailer.models.data_models import NodeMailerClient
@@ -102,8 +102,11 @@ class ClientDiscoveryModel(QtCore.QAbstractListModel):
             return
 
         self.mailing_clients.append(
-            NodeMailerClient(instance_name, datagram.senderAddress().toString())
+            NodeMailerClient(
+                instance_name, datagram.senderAddress().toString(), False
+            )  # TODO: Check for favorite add
         )
+        self.layoutChanged.emit()
 
     def should_datagram_be_processed(
         self, datagram: QtNetwork.QNetworkDatagram
@@ -119,3 +122,62 @@ class ClientDiscoveryModel(QtCore.QAbstractListModel):
             return False
 
         return all(client.ip_address != ip_address for client in self.mailing_clients)
+
+    def data(self, index: QtCore.QModelIndex, role: Any) -> Union[str, QtGui.QIcon]:
+        return None
+
+    def rowCount(self, _) -> int:  # noqa: N802
+        """Returns the number of mailing clients that have been found for use in UI.
+
+        Returns:
+            The number of mailing clients that have been found.
+        """
+        return len(self.mailing_clients)
+
+    def is_favorite(self, client_name: str) -> bool:
+        """Checks the QSettings to see if the client name is a favorite.
+
+        Args:
+            client: The client to check.
+
+        Returns:
+            True if the client is a favorite, False otherwise.
+        """
+        settings = QtCore.QSettings()
+        favorites = settings.value(
+            constants.SettingStrings.FAVORITES.value, defaultValue="[]"
+        )
+        parsed_favorites = json.loads(favorites)
+        return client_name in parsed_favorites
+
+    def add_favorite(self, client_name: str) -> None:
+        """Adds the client to the favorites QSetting.
+
+        Args:
+            client: The client to add to the favorites.
+        """
+        settings = QtCore.QSettings()
+        favorites = settings.value(
+            constants.SettingStrings.FAVORITES.value, defaultValue="[]"
+        )
+        parsed_favorites = json.loads(favorites)
+        parsed_favorites.append(client_name)
+        settings.setValue(
+            constants.SettingStrings.FAVORITES.value, json.dumps(parsed_favorites)
+        )
+
+    def remove_favorite(self, client_name: str) -> None:
+        """Removes the client from the favorites QSetting
+
+        Args:
+            client: The client to remove from the favorites.
+        """
+        settings = QtCore.QSettings()
+        favorites = settings.value(
+            constants.SettingStrings.FAVORITES.value, defaultValue="[]"
+        )
+        parsed_favorites = json.loads(favorites)
+        parsed_favorites.remove(client_name)
+        settings.setValue(
+            constants.SettingStrings.FAVORITES.value, json.dumps(parsed_favorites)
+        )

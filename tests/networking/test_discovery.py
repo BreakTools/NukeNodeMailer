@@ -1,8 +1,9 @@
 """Tests for the code that handles auto discovery of other running Nuke instances on the network."""
 
+import json
 from unittest.mock import MagicMock, patch
 
-from PySide2 import QtNetwork
+from PySide2 import QtCore, QtNetwork
 
 from node_mailer import constants
 from node_mailer.models.data_models import NodeMailerClient
@@ -105,3 +106,44 @@ def test_should_datagram_be_processed():
 
     mock_datagram.senderAddress.return_value.toString.return_value = "192.168.0.24"
     assert discovery.should_datagram_be_processed(mock_datagram)
+
+
+def test_data():
+    """Tests the data function that is used for display in the UI."""
+
+
+def test_row_count():
+    """Tests the row count function that is used for display in the UI."""
+
+
+def test_is_favorite():
+    """Tests is_favorite works properly."""
+    with patch.object(QtCore.QSettings, "value", return_value="[]"):
+        discovery = ClientDiscoveryModel()
+        assert not discovery.is_favorite("test_name")
+
+    with patch.object(QtCore.QSettings, "value", return_value='["test_name"]'):
+        discovery = ClientDiscoveryModel()
+        assert discovery.is_favorite("test_name")
+
+
+def test_add_favorite():
+    """Tests favorites are added properly."""
+    with patch.object(QtCore.QSettings, "setValue") as mock_set_value:
+        discovery = ClientDiscoveryModel()
+        discovery.add_favorite("test_name")
+        mock_set_value.assert_called_once_with(
+            constants.SettingStrings.FAVORITES.value, '["test_name"]'
+        )
+
+
+def test_remove_favorite():
+    """Tests favorites are removed properly."""
+    with patch.object(
+        QtCore.QSettings, "value", return_value='["test_name", "test_name2"]'
+    ), patch.object(QtCore.QSettings, "setValue") as mock_set_value:
+        discovery = ClientDiscoveryModel()
+        discovery.remove_favorite("test_name")
+        mock_set_value.assert_called_once_with(
+            constants.SettingStrings.FAVORITES.value, '["test_name2"]'
+        )
