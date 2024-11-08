@@ -49,7 +49,7 @@ def test_get_mailer_message_from_string():
 def test_send_message(qtbot):
     """Tests the message is properly sent."""
     messaging_handler = DirectMessagingHandler()
-    mailer_client = NodeMailerClient("test_user", "localhost")
+    mailer_client = NodeMailerClient("test_user", "localhost", False)
     test_message = NodeMailerMail(
         "test_user", "test_description", "test_node_string", 0
     )
