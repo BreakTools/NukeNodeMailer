@@ -1,9 +1,8 @@
 """Tests for the code that handles auto discovery of other running Nuke instances on the network."""
 
-import json
 from unittest.mock import MagicMock, patch
 
-from PySide2 import QtCore, QtNetwork
+from PySide2 import QtCore, QtGui, QtNetwork
 
 from node_mailer import constants
 from node_mailer.models.data_models import NodeMailerClient
@@ -93,8 +92,8 @@ def test_should_datagram_be_processed():
     discovery = ClientDiscoveryModel()
     discovery.local_addresses = ["192.168.0.22"]
     discovery.mailing_clients = [
-        NodeMailerClient("local_computer", "192.168.0.22"),
-        NodeMailerClient("remote_computer", "192.168.0.23"),
+        NodeMailerClient("local_computer", "192.168.0.22", False),
+        NodeMailerClient("remote_computer", "192.168.0.23", False),
     ]
 
     mock_datagram = MagicMock()
@@ -109,11 +108,30 @@ def test_should_datagram_be_processed():
 
 
 def test_data():
-    """Tests the data function that is used for display in the UI."""
+    """Tests the data function that is used for displaying text and icons in the UI.
+    Wish I could tests if the QIcons are actually displaying the correct image but I'm running
+    into a weird amount of crashes whenever I try to convert them and comparing them as images."""
+    discovery = ClientDiscoveryModel()
+    discovery.mailing_clients = [
+        NodeMailerClient("test_name", "fake_ip", False),
+        NodeMailerClient("test_name2", "fake_ip2", True),
+    ]
+    assert discovery.data(discovery.index(0, 0), QtCore.Qt.DisplayRole) == "test_name"
+    assert discovery.data(discovery.index(1, 0), QtCore.Qt.DisplayRole) == "test_name2"
+
+    client_image_icon = discovery.data(discovery.index(0, 0), QtCore.Qt.DecorationRole)
+    assert type(client_image_icon) == QtGui.QIcon
+    favorite_client_image_icon = discovery.data(
+        discovery.index(1, 0), QtCore.Qt.DecorationRole
+    )
+    assert type(favorite_client_image_icon) == QtGui.QIcon
 
 
 def test_row_count():
     """Tests the row count function that is used for display in the UI."""
+    discovery = ClientDiscoveryModel()
+    discovery.mailing_clients = [NodeMailerClient("test_name", "fake_ip", False)]
+    assert discovery.rowCount(None) == 1
 
 
 def test_is_favorite():

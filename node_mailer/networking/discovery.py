@@ -5,6 +5,7 @@ Written by Mervin van Brakel, 2024."""
 import json
 import os
 from typing import Any, List, Union
+from pathlib import Path
 
 from PySide2 import QtCore, QtGui, QtNetwork
 
@@ -97,14 +98,16 @@ class ClientDiscoveryModel(QtCore.QAbstractListModel):
             return
 
         try:
-            instance_name = parsed_data["name"]
+            mailer_client_name = parsed_data["name"]
         except KeyError:
             return
 
         self.mailing_clients.append(
             NodeMailerClient(
-                instance_name, datagram.senderAddress().toString(), False
-            )  # TODO: Check for favorite add
+                mailer_client_name,
+                datagram.senderAddress().toString(),
+                self.is_favorite(mailer_client_name),
+            )
         )
         self.layoutChanged.emit()
 
@@ -124,6 +127,31 @@ class ClientDiscoveryModel(QtCore.QAbstractListModel):
         return all(client.ip_address != ip_address for client in self.mailing_clients)
 
     def data(self, index: QtCore.QModelIndex, role: Any) -> Union[str, QtGui.QIcon]:
+        """Returns the text or icon for the given index and role.
+
+        Args:
+            index: The index of the item.
+            role: The role the data plays in the UI.
+        """
+        if role == QtCore.Qt.DisplayRole:
+            return self.mailing_clients[index.row()].name
+
+        if role == QtCore.Qt.DecorationRole:
+            if not self.mailing_clients[index.row()].favorite:
+                return QtGui.QIcon(
+                    str(
+                        Path(__file__).parent.parent / "resources" / "mailer_client.png"
+                    )
+                )
+
+            return QtGui.QIcon(
+                str(
+                    Path(__file__).parent.parent
+                    / "resources"
+                    / "favorite_mailer_client.png"
+                )
+            )
+
         return None
 
     def rowCount(self, _) -> int:  # noqa: N802
