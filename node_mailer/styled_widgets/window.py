@@ -1,10 +1,12 @@
-"""Windows 95 styled Qt containers, like parent widgets/dialogs and stuff.
+"""Windows 95 styled parent window widget.
 
 Written by Mervin van Brakel, 2024."""
 
 from pathlib import Path
 
 from PySide2 import QtCore, QtGui, QtWidgets
+
+from node_mailer.styled_widgets.utility import NoShadowStyle
 
 
 class NodeMailerWindow(QtWidgets.QWidget):
@@ -23,8 +25,16 @@ class NodeMailerWindow(QtWidgets.QWidget):
             QtCore.Qt.Window
             | QtCore.Qt.CustomizeWindowHint
             | QtCore.Qt.FramelessWindowHint
+            | QtCore.Qt.WindowStaysOnTopHint
         )
         self.configure_custom_dragging_and_resizing()
+
+        self.setWindowTitle(window_title)
+        self.setWindowIcon(
+            QtGui.QIcon(
+                str(Path(__file__).parent.parent / "resources" / "node_mailer_icon")
+            )
+        )
 
     def configure_user_interface(
         self, widget_to_display: QtWidgets.QWidget, window_title: str
@@ -37,13 +47,14 @@ class NodeMailerWindow(QtWidgets.QWidget):
         """
         self.store_button_icons()
         self.setStyleSheet(
-            "background-color: #C0C0C0; font: 11pt 'W95FA'; color: black;"
+            "background-color: #C0C0C0; font: 11pt 'W95FA'; color: black; text-shadow: none;"
         )
         layout = QtWidgets.QVBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignTop)
         layout.setContentsMargins(5, 5, 5, 5)
         layout.addWidget(self.get_menu_bar_widget(window_title))
         layout.addWidget(widget_to_display)
+        self.setStyle(NoShadowStyle())
         self.setLayout(layout)
 
     def store_button_icons(self) -> None:
@@ -95,6 +106,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         menu_bar.setStyleSheet(
             "background-color: #000080; color: white; font: 11pt 'W95FA'; border: none;"
         )
+        menu_bar.setStyle(NoShadowStyle())
         menu_bar_layout = QtWidgets.QHBoxLayout()
         menu_bar_layout.setSpacing(0)
         menu_bar_layout.setContentsMargins(3, 3, 3, 3)
@@ -121,7 +133,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
                 str(Path(__file__).parent.parent / "resources" / "node_mailer_icon.png")
             )
         )
-        icon.setContentsMargins(5, 0, 0, 0)
+        icon.setContentsMargins(0, 0, 0, 0)
         return icon
 
     def get_minimize_button(self) -> QtWidgets.QPushButton:
@@ -190,9 +202,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         if event.x() < 5 or event.x() > self.width() - 60:
             return False
 
-        result = 5 < event.y() < 25
-
-        return result
+        return 5 < event.y() < 25
 
     def is_mouse_on_bottom_right_corner(self, event) -> bool:
         """Checks if the mouse is located on the bottom right corner so we know we can resize the window.

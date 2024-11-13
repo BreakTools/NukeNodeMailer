@@ -1,5 +1,3 @@
-import os
-
 import nuke
 
 import node_mailer
@@ -12,27 +10,20 @@ def create_mailer_menu() -> None:
 
     mailer_menu.addCommand(
         "Mail Nodes",
-        "",
+        "global node_mailer_controller;node_mailer_controller.open_mailing_window()",
         "",
     )
     mailer_menu.addCommand(
         "Mail History",
-        "",
+        "global node_mailer_controller;node_mailer_controller.open_history_window()",
         "",
     )
     mailer_menu.addCommand("-", "", "")
     mailer_menu.addCommand(
         "About...",
-        "",
+        "global node_mailer_controller;node_mailer_controller.open_about_window()",
         "",
     )
-
-    if os.environ.get("PIPELINE_DEVELOPER"):
-        mailer_menu.addCommand(
-            "Reload Node Mailer",
-            "import importlib;importlib.reload(node_mailer)",
-            "",
-        )
 
 
 def start_node_mailer() -> None:

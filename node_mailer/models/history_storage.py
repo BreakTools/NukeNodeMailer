@@ -4,7 +4,7 @@ Written by Mervin van Brakel, 2024."""
 
 import sqlite3
 from pathlib import Path
-from typing import List, Any
+from typing import Any, List, Union
 
 from PySide2 import QtCore
 
@@ -15,7 +15,7 @@ from node_mailer.models.data_models import NodeMailerMail
 class HistoryStorage(QtCore.QAbstractTableModel):
     """Class that handles storage of received mails using a sqlite3 database."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the history storage by setting up the database connection and retrieving stored mails."""
         super().__init__()
         self.mail_history: List[NodeMailerMail] = []
@@ -48,7 +48,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         self.create_database()
         return sqlite3.connect(self.database_path)
 
-    def create_database(self):
+    def create_database(self) -> None:
         """Creates the database and configures it."""
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -69,7 +69,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         database.commit()
         database.close()
 
-    def retrieve_all_mail_from_database(self):
+    def retrieve_all_mail_from_database(self) -> None:
         """Retrieves all the mails from the database and stored them als NodeMailerMail objects on this model."""
         cursor = self.database.cursor()
         cursor.execute("SELECT * FROM node_mailer_history ORDER BY timestamp DESC")
@@ -83,7 +83,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
             for row in cursor.fetchall()
         ]
 
-    def store_mail(self, mail: NodeMailerMail):
+    def store_mail(self, mail: NodeMailerMail) -> None:
         """Stores the mail in the database.
 
         Args:
@@ -96,8 +96,24 @@ class HistoryStorage(QtCore.QAbstractTableModel):
             (mail.sender_name, mail.description, mail.node_string, mail.timestamp),
         )
         self.database.commit()
+        self.layoutChanged.emit()
 
-    def data(self, index: QtCore.QModelIndex, role: Any):
+    def delete_mail(self, index: QtCore.QModelIndex) -> None:
+        """Deletes the mail from the database and the model.
+
+        Args:
+            index: The index of the mail to delete.
+        """
+        mail = self.mail_history[index.row()]
+        self.database.execute(
+            "DELETE FROM node_mailer_history WHERE encoded_node_string = ? AND timestamp = ?",
+            (mail.node_string, mail.timestamp),
+        )
+        self.database.commit()
+        self.mail_history.pop(index.row())
+        self.layoutChanged.emit()
+
+    def data(self, index: QtCore.QModelIndex, role: Any) -> Union[str, None]:
         """Returns the data for the given index and role for use in the UI."""
         if role != QtCore.Qt.DisplayRole:
             return None
@@ -119,6 +135,30 @@ class HistoryStorage(QtCore.QAbstractTableModel):
                 self.mail_history[index.row()],
                 MailHistoryRow.TIMESTAMP.dataclass_field,
             )
+
+        return None
+
+    def headerData(self, section: int, orientation: QtCore.Qt.Orientation, role: int):  # noqa: N802
+        """Returns the header data for the given section, orientation, and role.
+
+        Args:
+            section: The section to get the header data for.
+            orientation: The orientation of the header.
+            role: The role of the header data.
+
+        Returns:
+            The header text to display in the UI.
+        """
+        if role != QtCore.Qt.DisplayRole:
+            return None
+
+        if orientation == QtCore.Qt.Horizontal:
+            if section == MailHistoryRow.SENDER_NAME.column_index:
+                return MailHistoryRow.SENDER_NAME.display_name
+            if section == MailHistoryRow.DESCRIPTION.column_index:
+                return MailHistoryRow.DESCRIPTION.display_name
+            if section == MailHistoryRow.TIMESTAMP.column_index:
+                return MailHistoryRow.TIMESTAMP.display_name
 
         return None
 

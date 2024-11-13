@@ -102,6 +102,29 @@ def test_store_mail(tmp_path):
         assert len(history_storage.mail_history) == 1
 
 
+def test_delete_mail(tmp_path):
+    """Tests the mail is deleted from the database with the TableModel updating accordingly."""
+    with patch(
+        "PySide2.QtCore.QStandardPaths.writableLocation",
+        return_value=str(tmp_path),
+    ):
+        history_storage = HistoryStorage()
+        add_fake_data_to_database(history_storage.database)
+        history_storage.retrieve_all_mail_from_database()
+
+        assert history_storage.mail_history[0].sender_name == "Test sender2"
+
+        history_storage.delete_mail(history_storage.index(0, 0))
+
+        assert len(history_storage.mail_history) == 1
+        assert history_storage.mail_history[0].sender_name == "Test sender"
+
+        cursor = history_storage.database.cursor()
+        cursor.execute("SELECT COUNT(*) FROM node_mailer_history")
+        count = cursor.fetchone()[0]
+        assert count == 1
+
+
 def test_data(tmp_path):
     """Tests the data is correctly retrieved from the database for display in UI."""
     with patch(

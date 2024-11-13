@@ -7,6 +7,8 @@ from pathlib import Path
 
 import nuke
 
+from node_mailer.models.data_models import NodeMailerMail
+
 
 def get_selected_nodes_as_encoded_string() -> str:
     """Writes the selected nodes to a temp .nk file and returns its contents in an encoded string.
@@ -34,3 +36,12 @@ def paste_nodes_from_encoded_string(encoded_node_string: str):
         temp_nuke_file = Path(temp_dir) / "nodes.nk"
         temp_nuke_file.write_text(decoded_node_string)
         nuke.nodePaste(str(temp_nuke_file))
+
+
+def import_mail(mail: NodeMailerMail) -> None:
+    """Imports the nodes from the mail into the current Nuke session.
+
+    Args:
+        mail: The mail to import.
+    """
+    paste_nodes_from_encoded_string(mail.node_string)

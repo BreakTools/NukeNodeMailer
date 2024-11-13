@@ -7,9 +7,13 @@ from pathlib import Path
 
 from PySide2 import QtCore, QtGui
 
+from . import nuke_interfacing
 from .models.history_storage import HistoryStorage
 from .networking.discovery import ClientDiscoveryModel
 from .networking.messaging import DirectMessagingHandler
+from .user_interface.about import AboutWindow
+from .user_interface.history import HistoryWindow
+from .user_interface.mailing import MailingWindow
 
 
 class NodeMailerController(QtCore.QObject):
@@ -19,6 +23,8 @@ class NodeMailerController(QtCore.QObject):
         print("[BreakTools] Starting Node Mailer background service...")
         self.initialize_systems()
         self.add_font_to_database()
+        self.initialize_windows()
+        self.connect_signals()
 
     def initialize_systems(self) -> None:
         """Initializes all systems/models required for Node Mailer to function."""
@@ -32,3 +38,25 @@ class NodeMailerController(QtCore.QObject):
         QtGui.QFontDatabase.addApplicationFont(
             str(Path(__file__).parent / "resources" / "W95FA.otf")
         )
+
+    def initialize_windows(self) -> None:
+        """Initializes all windows required for Node Mailer."""
+        self.mailing_window = MailingWindow()
+        self.about_window = AboutWindow()
+        self.history_window = HistoryWindow(self.history_storage_model)
+
+    def connect_signals(self) -> None:
+        """Connects the signals of various components together."""
+        self.history_window.import_mail.connect(nuke_interfacing.import_mail)
+
+    def open_mailing_window(self) -> None:
+        """Opens the mailing window."""
+        self.mailing_window.show()
+
+    def open_history_window(self) -> None:
+        """Opens the history window."""
+        self.history_window.show()
+
+    def open_about_window(self) -> None:
+        """Opens the about window."""
+        self.about_window.show()
