@@ -10,13 +10,15 @@ from pathlib import Path
 from PySide2 import QtCore, QtGui
 
 from . import nuke_interfacing
-from .data_models import NodeMailerMail, NodeMailerClient
+from .data_models import NodeMailerClient, NodeMailerMail
+from .models.constants import ReceivedMailPopupOption
 from .models.discovery import ClientDiscovery
 from .models.history_storage import HistoryStorage
 from .models.messaging import DirectMessaging
 from .user_interface.about import AboutWindow
 from .user_interface.history import HistoryWindow
 from .user_interface.mailing import MailingWindow
+from .user_interface.popups import ErrorPopup, ReceivedMailPopup
 
 
 class NodeMailerController(QtCore.QObject):
@@ -53,6 +55,7 @@ class NodeMailerController(QtCore.QObject):
         """Connects the signals of various components together."""
         self.history_window.import_mail.connect(nuke_interfacing.import_mail)
         self.mailing_window.send_mail.connect(self.send_mail)
+        self.direct_messaging_model.message_received.connect(self.mail_received)
 
     def open_mailing_window(self) -> None:
         """Opens the mailing window."""
@@ -60,6 +63,7 @@ class NodeMailerController(QtCore.QObject):
 
     def open_history_window(self) -> None:
         """Opens the history window."""
+        self.history_storage_model.retrieve_all_mail_from_database()
         self.history_window.show()
 
     def open_about_window(self) -> None:
@@ -74,7 +78,11 @@ class NodeMailerController(QtCore.QObject):
             message: The message
         """
         encoded_node_string = nuke_interfacing.get_selected_nodes_as_encoded_string()
-        # TODO: Validate we have nodes selected.
+
+        if not encoded_node_string:
+            error_popup = ErrorPopup("You don't have any nodes selected to mail!")
+            error_popup.exec_()
+            return
 
         unix_timestamp = int(datetime.now().timestamp())
 
@@ -85,3 +93,24 @@ class NodeMailerController(QtCore.QObject):
             timestamp=unix_timestamp,
         )
         self.direct_messaging_model.send_mail_to_client(mail, client)
+
+        self.mailing_window.message_text_edit.clear()
+        self.mailing_window.close()
+
+    def mail_received(self, mail: NodeMailerMail) -> None:
+        """Handles a received mail using the received mail popup.
+
+        Args:
+            mail: The mail that was received.
+        """
+        print(mail)
+        received_mail_popup = ReceivedMailPopup(mail)
+        received_mail_popup.exec_()
+
+        if received_mail_popup.picked_option == ReceivedMailPopupOption.IGNORE:
+            return
+
+        self.history_storage_model.store_mail(mail)
+
+        if received_mail_popup.picked_option == ReceivedMailPopupOption.IMPORT:
+            nuke_interfacing.import_mail(mail)

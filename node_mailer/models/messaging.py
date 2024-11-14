@@ -21,6 +21,7 @@ class DirectMessaging(QtCore.QObject):
         super().__init__()
         self.tcp_server = QtNetwork.QTcpServer()
         self.tcp_server.newConnection.connect(self.on_new_connection)
+        self.start_listening()
 
     def start_listening(self) -> None:
         """Starts listening for incoming messages."""
@@ -43,8 +44,9 @@ class DirectMessaging(QtCore.QObject):
             message: The message that was received.
         """
         message_string = message.data().decode("utf-8")
-        mailer_message = self.get_mail_from_message_string(message_string)
-        self.message_received.emit(mailer_message)
+        mail = self.get_mail_from_message_string(message_string)
+        self.message_received.emit(mail)
+        # TODO: Use QDataStreams to handle large messages that have multiple readyRead fires.
 
     def get_mail_from_message_string(self, message_string: str) -> NodeMailerMail:
         """Returns a NodeMailerMessage object from the network-sent string.

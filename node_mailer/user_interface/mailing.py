@@ -9,6 +9,7 @@ from node_mailer.models.discovery import ClientDiscovery
 from node_mailer.styled_widgets.button import NodeMailerButton
 from node_mailer.styled_widgets.utility import NoShadowStyle
 from node_mailer.styled_widgets.window import NodeMailerWindow
+from node_mailer.user_interface.popups import ErrorPopup
 
 
 class MailingWindow(NodeMailerWindow):
@@ -144,13 +145,19 @@ class MailingWindow(NodeMailerWindow):
 
     def on_send_mail_pressed(self) -> None:
         """Emits the signal for sending the mail to the selected client."""
-        client_index = self.list_view.selectionModel().selectedIndexes()[0]
-        # TODO: Validate we have client selected.
-        client = self.list_view.model().get_mailer_client_from_index(client_index)
+        selected_client_indexes = self.list_view.selectionModel().selectedIndexes()
+
+        if not selected_client_indexes:
+            error_popup = ErrorPopup(
+                "You haven't selected a client to send the mail to!"
+            )
+            error_popup.exec_()
+            return
+
+        client = self.list_view.model().get_mailer_client_from_index(
+            selected_client_indexes[0]
+        )
 
         message = self.message_text_edit.toPlainText()
 
         self.send_mail.emit(client, message)
-
-        self.message_text_edit.clear()
-        self.close()

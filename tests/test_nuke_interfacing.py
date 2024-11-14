@@ -12,6 +12,8 @@ from node_mailer.nuke_interfacing import (
 
 def test_get_selected_nodes_as_string():
     """Test to see if nodes are correctly converted to a string."""
+    assert get_selected_nodes_as_encoded_string() is None
+
     nuke.createNode("Constant")
     nuke.createNode("Text")
 

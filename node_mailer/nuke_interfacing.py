@@ -6,18 +6,22 @@ Written by Mervin van Brakel, 2024."""
 import base64
 import tempfile
 from pathlib import Path
+from typing import Union
 
 import nuke
 
 from node_mailer.data_models import NodeMailerMail
 
 
-def get_selected_nodes_as_encoded_string() -> str:
+def get_selected_nodes_as_encoded_string() -> Union[str, None]:
     """Writes the selected nodes to a temp .nk file and returns its contents in a base64 encoded string.
 
     Returns:
-        The selected nodes.
+        The selected nodes as an encoded string or None if no nodes are selected.
     """
+    if not nuke.selectedNodes():
+        return None
+
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_nuke_file = Path(temp_dir) / "nodes.nk"
         nuke.nodeCopy(str(temp_nuke_file))

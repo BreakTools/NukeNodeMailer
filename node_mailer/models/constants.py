@@ -8,7 +8,7 @@ from enum import Enum
 class MailHistoryRow(Enum):
     """Enum that stores mail history row mapping."""
 
-    SENDER_NAME = (0, "Sender Name", "sender_name")
+    SENDER_NAME = (0, "Sender name", "sender_name")
     MESSAGE = (1, "Message", "message")
     TIMESTAMP = (2, "Timestamp", "timestamp")
 
@@ -31,3 +31,11 @@ class SettingStrings(Enum):
     """Enum that stores setting strings for use with QSettings."""
 
     FAVORITES = "node_mailer/favorites"
+
+
+class ReceivedMailPopupOption(Enum):
+    """Enum that stores the options a user can pick in the received mail dialog."""
+
+    IGNORE = "Ignore"
+    SAVE = "Save"
+    IMPORT = "Import"

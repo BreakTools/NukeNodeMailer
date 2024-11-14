@@ -89,7 +89,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         Args:
             mail: The mail to store.
         """
-        self.mail_history.append(mail)
+        self.mail_history.insert(0, mail)
         self.database.execute(
             """INSERT INTO node_mailer_history (sender_name, description, encoded_node_string, timestamp)
             VALUES (?, ?, ?, ?)""",
@@ -131,9 +131,12 @@ class HistoryStorage(QtCore.QAbstractTableModel):
             )
 
         if index.column() == MailHistoryRow.TIMESTAMP.column_index:
-            return getattr(
+            timestamp = getattr(
                 self.mail_history[index.row()],
                 MailHistoryRow.TIMESTAMP.dataclass_field,
+            )
+            return QtCore.QDateTime.fromSecsSinceEpoch(timestamp).toString(
+                "dd-MM-yyyy hh:mm:ss"
             )
 
         return None

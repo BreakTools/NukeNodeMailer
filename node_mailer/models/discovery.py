@@ -27,6 +27,7 @@ class ClientDiscovery(QtCore.QAbstractListModel):
 
         self.store_icons()
         self.initialize_socket()
+        self.start_infinitely_broadcasting()
 
     def get_local_ip_addresses(self) -> List[str]:
         """Returns the local IP addresses of the machine. It's a list because some machines have
