@@ -4,7 +4,7 @@ Written by Mervin van Brakel, 2024."""
 
 from PySide2 import QtCore, QtWidgets
 
-from node_mailer.models.data_models import NodeMailerMail
+from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.history_storage import HistoryStorage
 from node_mailer.styled_widgets.button import NodeMailerButton
 from node_mailer.styled_widgets.utility import NoShadowStyle
@@ -16,7 +16,7 @@ class HistoryWindow(NodeMailerWindow):
 
     import_mail = QtCore.Signal(NodeMailerMail)
 
-    def __init__(self, history_storage_model: HistoryStorage):
+    def __init__(self, history_storage_model: HistoryStorage) -> None:
         """Initializes the History window.
 
         Args:

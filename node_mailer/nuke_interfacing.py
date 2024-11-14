@@ -1,5 +1,7 @@
 """All the code responsible for interfacing with Nuke. Yes this whole Nuke plugin only has 2 lines
-of code that use the Nuke API lol."""
+of code that actually use the Nuke API lol.
+
+Written by Mervin van Brakel, 2024."""
 
 import base64
 import tempfile
@@ -7,11 +9,11 @@ from pathlib import Path
 
 import nuke
 
-from node_mailer.models.data_models import NodeMailerMail
+from node_mailer.data_models import NodeMailerMail
 
 
 def get_selected_nodes_as_encoded_string() -> str:
-    """Writes the selected nodes to a temp .nk file and returns its contents in an encoded string.
+    """Writes the selected nodes to a temp .nk file and returns its contents in a base64 encoded string.
 
     Returns:
         The selected nodes.
@@ -23,8 +25,8 @@ def get_selected_nodes_as_encoded_string() -> str:
         return base64.b64encode(node_string.encode("ascii")).decode("ascii")
 
 
-def paste_nodes_from_encoded_string(encoded_node_string: str):
-    """Takes the string, decodes it, writes it as a temp .nk file and imports it.
+def paste_nodes_from_encoded_string(encoded_node_string: str) -> None:
+    """Takes the base64 encoded string, decodes it, writes it as a temp .nk file and imports it.
 
     Args:
         The string containing the nodes.

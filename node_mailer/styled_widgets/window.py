@@ -12,7 +12,7 @@ from node_mailer.styled_widgets.utility import NoShadowStyle
 class NodeMailerWindow(QtWidgets.QWidget):
     """Base window class that looks like Windows 95."""
 
-    def __init__(self, widget_to_display: QtWidgets.QWidget, window_title: str):
+    def __init__(self, widget_to_display: QtWidgets.QWidget, window_title: str) -> None:
         """Initializes the stylized Node Mailer window class.
 
         Args:
@@ -38,7 +38,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
 
     def configure_user_interface(
         self, widget_to_display: QtWidgets.QWidget, window_title: str
-    ):
+    ) -> None:
         """Configures the user interface with the given widget.
 
         Args:
@@ -84,7 +84,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
             str(Path(__file__).parent.parent / "resources" / "close_button.png")
         )
 
-    def configure_custom_dragging_and_resizing(self):
+    def configure_custom_dragging_and_resizing(self) -> None:
         """Configures our custom logic for moving and scaling the window."""
         self.setMouseTracking(True)
         self.last_mouse_click_x_coordinate = 0
@@ -243,12 +243,8 @@ class NodeMailerWindow(QtWidgets.QWidget):
         if self.is_mouse_on_bottom_right_corner(event):
             self.currently_resizing_window = True
 
-    def mouseReleaseEvent(self, event) -> None:  # noqa: N802
-        """Processes the mouse release event for stopping the dragging/resizing of the window.
-
-        Args:
-            event: The mouse event.
-        """
+    def mouseReleaseEvent(self, _) -> None:  # noqa: N802
+        """Processes the mouse release event for stopping the dragging/resizing of the window."""
         self.currently_moving_window = False
         self.currently_resizing_window = False
 

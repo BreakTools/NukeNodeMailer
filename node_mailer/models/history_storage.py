@@ -8,12 +8,12 @@ from typing import Any, List, Union
 
 from PySide2 import QtCore
 
+from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import MailHistoryRow
-from node_mailer.models.data_models import NodeMailerMail
 
 
 class HistoryStorage(QtCore.QAbstractTableModel):
-    """Class that handles storage of received mails using a sqlite3 database."""
+    """Model that handles storage of received mails using a sqlite3 database."""
 
     def __init__(self) -> None:
         """Initializes the history storage by setting up the database connection and retrieving stored mails."""
@@ -138,7 +138,9 @@ class HistoryStorage(QtCore.QAbstractTableModel):
 
         return None
 
-    def headerData(self, section: int, orientation: QtCore.Qt.Orientation, role: int):  # noqa: N802
+    def headerData(
+        self, section: int, orientation: QtCore.Qt.Orientation, role: int
+    ) -> str:  # noqa: N802
         """Returns the header data for the given section, orientation, and role.
 
         Args:
@@ -162,11 +164,11 @@ class HistoryStorage(QtCore.QAbstractTableModel):
 
         return None
 
-    def rowCount(self, _):  # noqa: N802
+    def rowCount(self, _) -> int:  # noqa: N802
         """Returns the number of rows in the model for display in UI."""
         return len(self.mail_history)
 
-    def columnCount(self, _):  # noqa: N802
+    def columnCount(self, _) -> int:  # noqa: N802
         """Returns the number of columns in the model for display in UI."""
         return len(MailHistoryRow)
 

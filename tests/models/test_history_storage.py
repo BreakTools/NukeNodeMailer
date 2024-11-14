@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 from PySide2 import QtCore
 
+from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import MailHistoryRow
-from node_mailer.models.data_models import NodeMailerMail
 from node_mailer.models.history_storage import HistoryStorage
 
 

@@ -8,9 +8,9 @@ from pathlib import Path
 from PySide2 import QtCore, QtGui
 
 from . import nuke_interfacing
+from .models.discovery import ClientDiscovery
 from .models.history_storage import HistoryStorage
-from .networking.discovery import ClientDiscoveryModel
-from .networking.messaging import DirectMessagingHandler
+from .models.messaging import DirectMessaging
 from .user_interface.about import AboutWindow
 from .user_interface.history import HistoryWindow
 from .user_interface.mailing import MailingWindow
@@ -19,8 +19,9 @@ from .user_interface.mailing import MailingWindow
 class NodeMailerController(QtCore.QObject):
     """Controller for Node Mailer, responsible for hooking up the models to the UI."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         print("[BreakTools] Starting Node Mailer background service...")
+        super().__init__()
         self.initialize_systems()
         self.add_font_to_database()
         self.initialize_windows()
@@ -28,8 +29,8 @@ class NodeMailerController(QtCore.QObject):
 
     def initialize_systems(self) -> None:
         """Initializes all systems/models required for Node Mailer to function."""
-        self.discovery_model = ClientDiscoveryModel()
-        self.direct_messaging_handler = DirectMessagingHandler()
+        self.discovery_model = ClientDiscovery()
+        self.direct_messaging_model = DirectMessaging()
         self.history_storage_model = HistoryStorage()
 
     def add_font_to_database(self) -> None:

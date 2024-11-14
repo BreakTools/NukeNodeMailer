@@ -1,7 +1,7 @@
 from . import (
     controller,
+    data_models,
     models,
-    networking,
     nuke_interfacing,
     styled_widgets,
     user_interface,

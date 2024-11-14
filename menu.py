@@ -1,3 +1,7 @@
+"""This file adds Node Mailer to the Nuke menubar and starts up the Node Mailer background processes.
+
+Written by Mervin van Brakel, 2024."""
+
 import nuke
 
 import node_mailer
