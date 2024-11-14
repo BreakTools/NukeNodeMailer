@@ -4,14 +4,14 @@ from unittest.mock import MagicMock, patch
 
 from PySide2 import QtCore, QtGui, QtNetwork
 
-from node_mailer import constants
-from node_mailer.models.data_models import NodeMailerClient
-from node_mailer.networking.discovery import ClientDiscoveryModel
+from node_mailer.data_models import NodeMailerClient
+from node_mailer.models import constants
+from node_mailer.models.discovery import ClientDiscovery
 
 
 def test_get_local_ip_addresses():
     """Test to make sure we only get proper local IPv4 addresses."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     with patch(
         "PySide2.QtNetwork.QNetworkInterface.allAddresses",
         return_value=[
@@ -28,7 +28,7 @@ def test_get_local_ip_addresses():
 
 def test_get_broadcast_message():
     """Test the broadcast message."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     with patch("os.getlogin", return_value="test_user"):
         assert (
             discovery.get_broadcast_message()
@@ -38,7 +38,7 @@ def test_get_broadcast_message():
 
 def test_broadcast_presence(qtbot):
     """Tests that the UDP broadcast data is properly sent."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     discovery.broadcast_message = (
         '{"type": "node_mailer_instance", "name": "test_user"}'
     )
@@ -61,7 +61,7 @@ def test_broadcast_presence(qtbot):
 
 def test_process_datagram():
     """Tests the datagram is properly processed."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     mock_datagram = MagicMock()
 
     # Supposed to fail silently
@@ -89,7 +89,7 @@ def test_process_datagram():
 
 def test_should_datagram_be_processed():
     """Test to check if the datagram should be processed."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     discovery.local_addresses = ["192.168.0.22"]
     discovery.mailing_clients = [
         NodeMailerClient("local_computer", "192.168.0.22", False),
@@ -111,7 +111,7 @@ def test_data():
     """Tests the data function that is used for displaying text and icons in the UI.
     Wish I could tests if the QIcons are actually displaying the correct image but I'm running
     into a weird amount of crashes whenever I try to convert them and comparing them as images."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     discovery.mailing_clients = [
         NodeMailerClient("test_name", "fake_ip", False),
         NodeMailerClient("test_name2", "fake_ip2", True),
@@ -129,7 +129,7 @@ def test_data():
 
 def test_row_count():
     """Tests the row count function that is used for display in the UI."""
-    discovery = ClientDiscoveryModel()
+    discovery = ClientDiscovery()
     discovery.mailing_clients = [NodeMailerClient("test_name", "fake_ip", False)]
     assert discovery.rowCount(None) == 1
 
@@ -137,18 +137,18 @@ def test_row_count():
 def test_is_favorite():
     """Tests is_favorite works properly."""
     with patch.object(QtCore.QSettings, "value", return_value="[]"):
-        discovery = ClientDiscoveryModel()
+        discovery = ClientDiscovery()
         assert not discovery.is_favorite("test_name")
 
     with patch.object(QtCore.QSettings, "value", return_value='["test_name"]'):
-        discovery = ClientDiscoveryModel()
+        discovery = ClientDiscovery()
         assert discovery.is_favorite("test_name")
 
 
 def test_add_favorite():
     """Tests favorites are added properly."""
     with patch.object(QtCore.QSettings, "setValue") as mock_set_value:
-        discovery = ClientDiscoveryModel()
+        discovery = ClientDiscovery()
         discovery.add_favorite("test_name")
         mock_set_value.assert_called_once_with(
             constants.SettingStrings.FAVORITES.value, '["test_name"]'
@@ -160,7 +160,7 @@ def test_remove_favorite():
     with patch.object(
         QtCore.QSettings, "value", return_value='["test_name", "test_name2"]'
     ), patch.object(QtCore.QSettings, "setValue") as mock_set_value:
-        discovery = ClientDiscoveryModel()
+        discovery = ClientDiscovery()
         discovery.remove_favorite("test_name")
         mock_set_value.assert_called_once_with(
             constants.SettingStrings.FAVORITES.value, '["test_name2"]'

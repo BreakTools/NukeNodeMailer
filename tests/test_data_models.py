@@ -1,6 +1,6 @@
 """Tests for the data models use in Node Mailer."""
 
-from node_mailer.models.data_models import NodeMailerClient, NodeMailerMail
+from node_mailer.data_models import NodeMailerClient, NodeMailerMail
 
 
 def test_node_mailer_client():

@@ -5,14 +5,14 @@ import json
 import pytest
 from PySide2 import QtCore, QtNetwork
 
-from node_mailer import constants
-from node_mailer.models.data_models import NodeMailerClient, NodeMailerMail
-from node_mailer.networking.messaging import DirectMessagingHandler
+from node_mailer.data_models import NodeMailerClient, NodeMailerMail
+from node_mailer.models import constants
+from node_mailer.models.messaging import DirectMessaging
 
 
 def test_on_message_received(qtbot):
     """Tests the message_received signal is properly emitted."""
-    messaging_handler = DirectMessagingHandler()
+    messaging_handler = DirectMessaging()
     messaging_handler.start_listening()
     test_message = NodeMailerMail(
         "test_user", "test_description", "test_node_string", 0
@@ -33,7 +33,7 @@ def test_on_message_received(qtbot):
 
 def test_get_mailer_message_from_string():
     """Tests we get a proper dataclass from the network-sent string."""
-    messaging_handler = DirectMessagingHandler()
+    messaging_handler = DirectMessaging()
 
     message_string = "total gibberish"
     with pytest.raises(json.JSONDecodeError):
@@ -48,7 +48,7 @@ def test_get_mailer_message_from_string():
 
 def test_send_message(qtbot):
     """Tests the message is properly sent."""
-    messaging_handler = DirectMessagingHandler()
+    messaging_handler = DirectMessaging()
     mailer_client = NodeMailerClient("test_user", "localhost", False)
     test_message = NodeMailerMail(
         "test_user", "test_description", "test_node_string", 0

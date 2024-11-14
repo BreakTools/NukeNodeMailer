@@ -6,17 +6,17 @@ import json
 
 from PySide2 import QtCore, QtNetwork
 
-from node_mailer import constants
-from node_mailer.models.data_models import NodeMailerClient, NodeMailerMail
+from node_mailer.data_models import NodeMailerClient, NodeMailerMail
+from node_mailer.models import constants
 
 
-class DirectMessagingHandler(QtCore.QObject):
-    """Class that handles everything related to directly sending messages to other clients across the network.
+class DirectMessaging(QtCore.QObject):
+    """Model that handles everything related to directly sending messages to other clients across the network.
     Uses TCP to receive/send data."""
 
     message_received = QtCore.Signal(NodeMailerMail)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the messaging handler."""
         super().__init__()
         self.tcp_server = QtNetwork.QTcpServer()

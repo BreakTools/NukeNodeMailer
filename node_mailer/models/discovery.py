@@ -4,20 +4,20 @@ Written by Mervin van Brakel, 2024."""
 
 import json
 import os
-from typing import Any, List, Union
 from pathlib import Path
+from typing import Any, List, Union
 
 from PySide2 import QtCore, QtGui, QtNetwork
 
-from node_mailer import constants
-from node_mailer.models.data_models import NodeMailerClient
+from node_mailer.data_models import NodeMailerClient
+from node_mailer.models import constants
 
 
-class ClientDiscoveryModel(QtCore.QAbstractListModel):
-    """Class that handles discovery and storage of other Node Mailer clients.
+class ClientDiscovery(QtCore.QAbstractListModel):
+    """Model that handles discovery and storage of other Node Mailer clients.
     Uses UDP broadcasting to find other instances on the local network."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the model class."""
         super().__init__()
         self.mailing_clients: List[NodeMailerClient] = []
