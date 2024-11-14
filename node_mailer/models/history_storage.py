@@ -76,7 +76,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         self.mail_history = [
             NodeMailerMail(
                 sender_name=row[1],
-                description=row[2],
+                message=row[2],
                 node_string=row[3],
                 timestamp=row[4],
             )
@@ -93,7 +93,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         self.database.execute(
             """INSERT INTO node_mailer_history (sender_name, description, encoded_node_string, timestamp)
             VALUES (?, ?, ?, ?)""",
-            (mail.sender_name, mail.description, mail.node_string, mail.timestamp),
+            (mail.sender_name, mail.message, mail.node_string, mail.timestamp),
         )
         self.database.commit()
         self.layoutChanged.emit()
@@ -124,10 +124,10 @@ class HistoryStorage(QtCore.QAbstractTableModel):
                 MailHistoryRow.SENDER_NAME.dataclass_field,
             )
 
-        if index.column() == MailHistoryRow.DESCRIPTION.column_index:
+        if index.column() == MailHistoryRow.MESSAGE.column_index:
             return getattr(
                 self.mail_history[index.row()],
-                MailHistoryRow.DESCRIPTION.dataclass_field,
+                MailHistoryRow.MESSAGE.dataclass_field,
             )
 
         if index.column() == MailHistoryRow.TIMESTAMP.column_index:
@@ -157,8 +157,8 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         if orientation == QtCore.Qt.Horizontal:
             if section == MailHistoryRow.SENDER_NAME.column_index:
                 return MailHistoryRow.SENDER_NAME.display_name
-            if section == MailHistoryRow.DESCRIPTION.column_index:
-                return MailHistoryRow.DESCRIPTION.display_name
+            if section == MailHistoryRow.MESSAGE.column_index:
+                return MailHistoryRow.MESSAGE.display_name
             if section == MailHistoryRow.TIMESTAMP.column_index:
                 return MailHistoryRow.TIMESTAMP.display_name
 

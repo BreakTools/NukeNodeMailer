@@ -31,7 +31,7 @@ def test_on_message_received(qtbot):
     messaging_handler.tcp_server.close()
 
 
-def test_get_mailer_message_from_string():
+def test_get_mail_from_message_string():
     """Tests we get a proper dataclass from the network-sent string."""
     messaging_handler = DirectMessaging()
 
@@ -39,25 +39,23 @@ def test_get_mailer_message_from_string():
     with pytest.raises(json.JSONDecodeError):
         messaging_handler.get_mail_from_message_string(message_string)
 
-    message_string = '{"sender_name": "test_user", "description": "test_description", "node_string": "test_node_string", "timestamp": 0}'
+    message_string = '{"sender_name": "test_user", "message": "test_message", "node_string": "test_node_string", "timestamp": 0}'
 
     assert messaging_handler.get_mail_from_message_string(
         message_string
-    ) == NodeMailerMail("test_user", "test_description", "test_node_string", 0)
+    ) == NodeMailerMail("test_user", "test_message", "test_node_string", 0)
 
 
-def test_send_message(qtbot):
+def test_send_mail_to_client(qtbot):
     """Tests the message is properly sent."""
     messaging_handler = DirectMessaging()
     mailer_client = NodeMailerClient("test_user", "localhost", False)
-    test_message = NodeMailerMail(
-        "test_user", "test_description", "test_node_string", 0
-    )
+    test_mail = NodeMailerMail("test_user", "test_message", "test_node_string", 0)
     test_server = QtNetwork.QTcpServer()
     test_server.listen(port=constants.Ports.MESSAGING.value)
 
     with qtbot.waitSignal(test_server.newConnection, timeout=1000):
-        messaging_handler.send_message_to_client(mailer_client, test_message)
+        messaging_handler.send_mail_to_client(test_mail, mailer_client)
 
     client = test_server.nextPendingConnection()
     with qtbot.waitSignal(client.readyRead, timeout=1000):
@@ -65,5 +63,5 @@ def test_send_message(qtbot):
 
     message = client.readAll()
     assert message == QtCore.QByteArray(
-        b'{"sender_name": "test_user", "description": "test_description", "node_string": "test_node_string", "timestamp": 0}'
+        b'{"sender_name": "test_user", "message": "test_message", "node_string": "test_node_string", "timestamp": 0}'
     )

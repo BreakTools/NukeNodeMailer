@@ -58,14 +58,16 @@ class DirectMessaging(QtCore.QObject):
         parsed_message = json.loads(message_string)
         return NodeMailerMail(**parsed_message)
 
-    def send_message_to_client(
-        self, client: NodeMailerClient, mail: NodeMailerMail
+    def send_mail_to_client(
+        self,
+        mail: NodeMailerMail,
+        client: NodeMailerClient,
     ) -> None:
         """Sends a mail message to another Node Mailer client.
 
         Args:
-            client: The client to send the message to.
             mail: The mail to send.
+            client: The client to send the message to.
         """
         tcp_socket = QtNetwork.QTcpSocket()
         tcp_socket.connectToHost(client.ip_address, constants.Ports.MESSAGING.value)

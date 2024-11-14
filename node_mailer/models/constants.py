@@ -9,7 +9,7 @@ class MailHistoryRow(Enum):
     """Enum that stores mail history row mapping."""
 
     SENDER_NAME = (0, "Sender Name", "sender_name")
-    DESCRIPTION = (1, "Description", "description")
+    MESSAGE = (1, "Message", "message")
     TIMESTAMP = (2, "Timestamp", "timestamp")
 
     def __init__(

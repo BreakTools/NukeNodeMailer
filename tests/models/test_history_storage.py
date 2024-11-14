@@ -191,7 +191,7 @@ def test_get_mailer_data_from_index(tmp_path):
             history_storage.index(1, 0)
         )
         assert message.sender_name == "Test sender"
-        assert message.description == "Test message"
+        assert message.message == "Test message"
         assert message.node_string == "Test node string"
         assert message.timestamp == 1
 

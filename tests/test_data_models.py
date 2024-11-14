@@ -13,12 +13,12 @@ def test_node_mailer_client():
 
 def test_node_mailer_mail():
     """Tests the NodeMailerMail dataclass."""
-    mail = NodeMailerMail("Test sender", "Test description", "Test node string", 123)
+    mail = NodeMailerMail("Test sender", "Test message", "Test node string", 123)
     assert mail.sender_name == "Test sender"
-    assert mail.description == "Test description"
+    assert mail.message == "Test message"
     assert mail.node_string == "Test node string"
     assert mail.timestamp == 123
     assert (
         mail.as_json()
-        == '{"sender_name": "Test sender", "description": "Test description", "node_string": "Test node string", "timestamp": 123}'
+        == '{"sender_name": "Test sender", "message": "Test message", "node_string": "Test node string", "timestamp": 123}'
     )

@@ -3,11 +3,14 @@ starting background processes, connecting slots and signals, etc.
 
 Written by Mervin van Brakel, 2024."""
 
+import os
+from datetime import datetime
 from pathlib import Path
 
 from PySide2 import QtCore, QtGui
 
 from . import nuke_interfacing
+from .data_models import NodeMailerMail, NodeMailerClient
 from .models.discovery import ClientDiscovery
 from .models.history_storage import HistoryStorage
 from .models.messaging import DirectMessaging
@@ -42,13 +45,14 @@ class NodeMailerController(QtCore.QObject):
 
     def initialize_windows(self) -> None:
         """Initializes all windows required for Node Mailer."""
-        self.mailing_window = MailingWindow()
+        self.mailing_window = MailingWindow(self.discovery_model)
         self.about_window = AboutWindow()
         self.history_window = HistoryWindow(self.history_storage_model)
 
     def connect_signals(self) -> None:
         """Connects the signals of various components together."""
         self.history_window.import_mail.connect(nuke_interfacing.import_mail)
+        self.mailing_window.send_mail.connect(self.send_mail)
 
     def open_mailing_window(self) -> None:
         """Opens the mailing window."""
@@ -61,3 +65,23 @@ class NodeMailerController(QtCore.QObject):
     def open_about_window(self) -> None:
         """Opens the about window."""
         self.about_window.show()
+
+    def send_mail(self, client: NodeMailerClient, message: str) -> None:
+        """Retrieves data from other systems and sends it off to the given client.
+
+        Args:
+            client: The client to send the mail to.
+            message: The message
+        """
+        encoded_node_string = nuke_interfacing.get_selected_nodes_as_encoded_string()
+        # TODO: Validate we have nodes selected.
+
+        unix_timestamp = int(datetime.now().timestamp())
+
+        mail = NodeMailerMail(
+            sender_name=os.getlogin(),
+            message=message,
+            node_string=encoded_node_string,
+            timestamp=unix_timestamp,
+        )
+        self.direct_messaging_model.send_mail_to_client(mail, client)

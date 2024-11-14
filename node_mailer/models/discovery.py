@@ -25,6 +25,7 @@ class ClientDiscovery(QtCore.QAbstractListModel):
         self.local_addresses = self.get_local_ip_addresses()
         self.broadcast_message = self.get_broadcast_message()
 
+        self.store_icons()
         self.initialize_socket()
 
     def get_local_ip_addresses(self) -> List[str]:
@@ -50,6 +51,32 @@ class ClientDiscovery(QtCore.QAbstractListModel):
             constants.Ports.BROADCAST.value,
         )
         self.udp_socket.readyRead.connect(self.on_datagram_received)
+
+    def store_icons(self) -> None:
+        """Stores the icons this model should return."""
+        self.mail_client_icon = self.get_correctly_displaying_icon(
+            Path(__file__).parent.parent / "resources" / "mailer_client.png"
+        )
+        self.favorite_mail_client_icon = self.get_correctly_displaying_icon(
+            Path(__file__).parent.parent / "resources" / "favorite_mailer_client.png"
+        )
+
+    def get_correctly_displaying_icon(self, path: Path) -> QtGui.QIcon:
+        """Returns the QIcon that displays nicely in the UI.
+        By default Qt will highlight selected list view icons, but that's not a thing in Window 95.
+        As a workaround we need to set both the Normal and the Selected QIcon states to the same icon, because
+        Qt only highlights the selected icon if there's no 'Selected' image stored on the QIcon it's displaying.
+
+        Args:
+            path: The path to the icon.
+
+        Returns:
+            The icon that will correctly display in the UI.
+        """
+        icon = QtGui.QIcon(str(path))
+        icon.addFile(str(path), mode=QtGui.QIcon.Normal)
+        icon.addFile(str(path), mode=QtGui.QIcon.Selected)
+        return icon
 
     def get_broadcast_message(self) -> str:
         """Returns the message that should be broadcasted to other Nuke instances.
@@ -109,7 +136,12 @@ class ClientDiscovery(QtCore.QAbstractListModel):
                 self.is_favorite(mailer_client_name),
             )
         )
+        self.sort_by_favorites()
         self.layoutChanged.emit()
+
+    def sort_by_favorites(self) -> None:
+        """Sorts our stored mailing clients so the favorites show up first."""
+        self.mailing_clients.sort(key=lambda client: client.favorite, reverse=True)
 
     def should_datagram_be_processed(
         self, datagram: QtNetwork.QNetworkDatagram
@@ -138,21 +170,24 @@ class ClientDiscovery(QtCore.QAbstractListModel):
 
         if role == QtCore.Qt.DecorationRole:
             if not self.mailing_clients[index.row()].favorite:
-                return QtGui.QIcon(
-                    str(
-                        Path(__file__).parent.parent / "resources" / "mailer_client.png"
-                    )
-                )
+                return self.mail_client_icon
 
-            return QtGui.QIcon(
-                str(
-                    Path(__file__).parent.parent
-                    / "resources"
-                    / "favorite_mailer_client.png"
-                )
-            )
+            return self.favorite_mail_client_icon
 
         return None
+
+    def get_mailer_client_from_index(
+        self, index: QtCore.QModelIndex
+    ) -> NodeMailerClient:
+        """Returns the mailer client from the given index.
+
+        Args:
+            index: The index of the mailer client.
+
+        Returns:
+            The mailer client at the given index.
+        """
+        return self.mailing_clients[index.row()]
 
     def rowCount(self, _) -> int:  # noqa: N802
         """Returns the number of mailing clients that have been found for use in UI.
@@ -161,6 +196,22 @@ class ClientDiscovery(QtCore.QAbstractListModel):
             The number of mailing clients that have been found.
         """
         return len(self.mailing_clients)
+
+    def toggle_favorite(self, index: QtCore.QModelIndex) -> None:
+        """Toggles the favorite status of the client at the given index.
+
+        Args:
+            index: The index of the client to toggle the favorite status of.
+        """
+        client = self.mailing_clients[index.row()]
+        if client.favorite:
+            self.remove_favorite(client.name)
+        else:
+            self.add_favorite(client.name)
+
+        client.favorite = not client.favorite
+        self.sort_by_favorites()
+        self.layoutChanged.emit()
 
     def is_favorite(self, client_name: str) -> bool:
         """Checks the QSettings to see if the client name is a favorite.
@@ -193,6 +244,7 @@ class ClientDiscovery(QtCore.QAbstractListModel):
         settings.setValue(
             constants.SettingStrings.FAVORITES.value, json.dumps(parsed_favorites)
         )
+        self.layoutChanged.emit()
 
     def remove_favorite(self, client_name: str) -> None:
         """Removes the client from the favorites QSetting

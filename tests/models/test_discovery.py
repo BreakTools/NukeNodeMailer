@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from PySide2 import QtCore, QtGui, QtNetwork
+from PySide2 import QtCore, QtGui, QtNetwork, QtWidgets
 
 from node_mailer.data_models import NodeMailerClient
 from node_mailer.models import constants
@@ -11,6 +11,7 @@ from node_mailer.models.discovery import ClientDiscovery
 
 def test_get_local_ip_addresses():
     """Test to make sure we only get proper local IPv4 addresses."""
+
     discovery = ClientDiscovery()
     with patch(
         "PySide2.QtNetwork.QNetworkInterface.allAddresses",
@@ -87,6 +88,19 @@ def test_process_datagram():
     assert discovery.mailing_clients[0].ip_address == "145.90.27.1"
 
 
+def test_sort_by_favorites():
+    """Tests the sorting by favorites function."""
+    discovery = ClientDiscovery()
+    discovery.mailing_clients = [
+        NodeMailerClient("test_name", "fake_ip", False),
+        NodeMailerClient("test_name2", "fake_ip2", True),
+    ]
+
+    discovery.sort_by_favorites()
+    assert discovery.mailing_clients[0].name == "test_name2"
+    assert discovery.mailing_clients[1].name == "test_name"
+
+
 def test_should_datagram_be_processed():
     """Test to check if the datagram should be processed."""
     discovery = ClientDiscovery()
@@ -127,11 +141,49 @@ def test_data():
     assert type(favorite_client_image_icon) == QtGui.QIcon
 
 
+def test_get_mailer_client_from_index():
+    """Tests the client from index function."""
+    discovery = ClientDiscovery()
+    discovery.mailing_clients = [
+        NodeMailerClient("test_name", "fake_ip", False),
+        NodeMailerClient("test_name2", "fake_ip2", True),
+    ]
+
+    assert (
+        discovery.get_mailer_client_from_index(discovery.index(0, 0)).name
+        == "test_name"
+    )
+    assert (
+        discovery.get_mailer_client_from_index(discovery.index(1, 0)).name
+        == "test_name2"
+    )
+
+
 def test_row_count():
     """Tests the row count function that is used for display in the UI."""
     discovery = ClientDiscovery()
     discovery.mailing_clients = [NodeMailerClient("test_name", "fake_ip", False)]
     assert discovery.rowCount(None) == 1
+
+
+def test_toggle_favorite():
+    """Tests the toggle favorite function."""
+    with patch.object(
+        ClientDiscovery, "add_favorite"
+    ) as mock_add_favorite, patch.object(
+        ClientDiscovery, "remove_favorite"
+    ) as mock_remove_favorite:
+        discovery = ClientDiscovery()
+        discovery.mailing_clients = [
+            NodeMailerClient("test_name", "fake_ip", False),
+            NodeMailerClient("test_name2", "fake_ip2", True),
+        ]
+
+        discovery.toggle_favorite(discovery.index(0, 0))
+        mock_add_favorite.assert_called_once_with("test_name")
+
+        discovery.toggle_favorite(discovery.index(1, 0))
+        mock_remove_favorite.assert_called_once_with("test_name2")
 
 
 def test_is_favorite():
