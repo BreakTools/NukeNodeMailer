@@ -1,8 +1,9 @@
 """Tests for the code that handles auto discovery of other running Nuke instances on the network."""
 
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from PySide2 import QtCore, QtGui, QtNetwork, QtWidgets
+from PySide2 import QtCore, QtGui, QtNetwork
 
 from node_mailer.data_models import NodeMailerClient
 from node_mailer.models import constants
@@ -52,7 +53,7 @@ def test_broadcast_presence(qtbot):
     )
 
     with qtbot.waitSignal(test_listening_socket.readyRead, timeout=10000) as blocker:
-        discovery.start_infinitely_broadcasting()
+        discovery.start_background_processes()
 
     while test_listening_socket.hasPendingDatagrams():
         datagram = test_listening_socket.receiveDatagram()
@@ -60,7 +61,24 @@ def test_broadcast_presence(qtbot):
     assert datagram.data().data().decode("utf-8") == discovery.broadcast_message
 
 
-def test_process_datagram():
+def test_remove_stale_clients(freezer):
+    """Tests that stale clients are removed."""
+    discovery = ClientDiscovery()
+    discovery.mailing_clients = [
+        NodeMailerClient(
+            "test_name", "fake_ip", False, datetime.now().timestamp() - 31
+        ),
+        NodeMailerClient(
+            "test_name2", "fake_ip2", False, datetime.now().timestamp() - 10
+        ),
+    ]
+
+    discovery.remove_stale_clients()
+    assert len(discovery.mailing_clients) == 1
+    assert discovery.mailing_clients[0].name == "test_name2"
+
+
+def test_process_datagram(freezer):
     """Tests the datagram is properly processed."""
     discovery = ClientDiscovery()
     mock_datagram = MagicMock()
@@ -86,14 +104,18 @@ def test_process_datagram():
     assert len(discovery.mailing_clients) == 1
     assert discovery.mailing_clients[0].name == "test_name"
     assert discovery.mailing_clients[0].ip_address == "145.90.27.1"
+    assert not discovery.mailing_clients[0].favorite
+    assert (
+        discovery.mailing_clients[0].last_seen_timestamp == datetime.now().timestamp()
+    )
 
 
 def test_sort_by_favorites():
     """Tests the sorting by favorites function."""
     discovery = ClientDiscovery()
     discovery.mailing_clients = [
-        NodeMailerClient("test_name", "fake_ip", False),
-        NodeMailerClient("test_name2", "fake_ip2", True),
+        NodeMailerClient("test_name", "fake_ip", False, 0),
+        NodeMailerClient("test_name2", "fake_ip2", True, 0),
     ]
 
     discovery.sort_by_favorites()
@@ -106,8 +128,8 @@ def test_should_datagram_be_processed():
     discovery = ClientDiscovery()
     discovery.local_addresses = ["192.168.0.22"]
     discovery.mailing_clients = [
-        NodeMailerClient("local_computer", "192.168.0.22", False),
-        NodeMailerClient("remote_computer", "192.168.0.23", False),
+        NodeMailerClient("local_computer", "192.168.0.22", False, 0),
+        NodeMailerClient("remote_computer", "192.168.0.23", False, 0),
     ]
 
     mock_datagram = MagicMock()
@@ -115,10 +137,37 @@ def test_should_datagram_be_processed():
     assert not discovery.should_datagram_be_processed(mock_datagram)
 
     mock_datagram.senderAddress.return_value.toString.return_value = "192.168.0.23"
-    assert not discovery.should_datagram_be_processed(mock_datagram)
+    assert discovery.should_datagram_be_processed(mock_datagram)
 
     mock_datagram.senderAddress.return_value.toString.return_value = "192.168.0.24"
     assert discovery.should_datagram_be_processed(mock_datagram)
+
+
+def test_get_stored_client_from_name():
+    """Tests the get stored client function."""
+    discovery = ClientDiscovery()
+    discovery.mailing_clients = [
+        NodeMailerClient("test_name", "fake_ip", False, 0),
+    ]
+    assert (
+        discovery.get_stored_client_from_name("test_name")
+        == discovery.mailing_clients[0]
+    )
+    assert discovery.get_stored_client_from_name("test_name2") is None
+
+
+def test_update_client_last_seen_timestamp(freezer):
+    """Tests the last seen timestamp is properly updated."""
+    discovery = ClientDiscovery()
+    discovery.mailing_clients = [
+        NodeMailerClient("test_name", "fake_ip", False, 0),
+    ]
+
+    discovery.update_client_last_seen_timestamp(discovery.mailing_clients[0])
+
+    assert (
+        discovery.mailing_clients[0].last_seen_timestamp == datetime.now().timestamp()
+    )
 
 
 def test_data():
@@ -127,8 +176,8 @@ def test_data():
     into a weird amount of crashes whenever I try to convert them and comparing them as images."""
     discovery = ClientDiscovery()
     discovery.mailing_clients = [
-        NodeMailerClient("test_name", "fake_ip", False),
-        NodeMailerClient("test_name2", "fake_ip2", True),
+        NodeMailerClient("test_name", "fake_ip", False, 0),
+        NodeMailerClient("test_name2", "fake_ip2", True, 0),
     ]
     assert discovery.data(discovery.index(0, 0), QtCore.Qt.DisplayRole) == "test_name"
     assert discovery.data(discovery.index(1, 0), QtCore.Qt.DisplayRole) == "test_name2"
@@ -145,8 +194,8 @@ def test_get_mailer_client_from_index():
     """Tests the client from index function."""
     discovery = ClientDiscovery()
     discovery.mailing_clients = [
-        NodeMailerClient("test_name", "fake_ip", False),
-        NodeMailerClient("test_name2", "fake_ip2", True),
+        NodeMailerClient("test_name", "fake_ip", False, 0),
+        NodeMailerClient("test_name2", "fake_ip2", True, 0),
     ]
 
     assert (
@@ -162,7 +211,7 @@ def test_get_mailer_client_from_index():
 def test_row_count():
     """Tests the row count function that is used for display in the UI."""
     discovery = ClientDiscovery()
-    discovery.mailing_clients = [NodeMailerClient("test_name", "fake_ip", False)]
+    discovery.mailing_clients = [NodeMailerClient("test_name", "fake_ip", False, 0)]
     assert discovery.rowCount(None) == 1
 
 
@@ -175,8 +224,8 @@ def test_toggle_favorite():
     ) as mock_remove_favorite:
         discovery = ClientDiscovery()
         discovery.mailing_clients = [
-            NodeMailerClient("test_name", "fake_ip", False),
-            NodeMailerClient("test_name2", "fake_ip2", True),
+            NodeMailerClient("test_name", "fake_ip", False, 0),
+            NodeMailerClient("test_name2", "fake_ip2", True, 0),
         ]
 
         discovery.toggle_favorite(discovery.index(0, 0))

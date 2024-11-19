@@ -13,6 +13,7 @@ class NodeMailerClient:
     name: str
     ip_address: str
     favorite: bool
+    last_seen_timestamp: float
 
 
 @dataclass

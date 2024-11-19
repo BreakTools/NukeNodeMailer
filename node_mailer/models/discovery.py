@@ -4,6 +4,7 @@ Written by Mervin van Brakel, 2024."""
 
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any, List, Union
 
@@ -17,8 +18,6 @@ class ClientDiscovery(QtCore.QAbstractListModel):
     """Model that handles discovery and storage of other Node Mailer clients.
     Uses UDP broadcasting to find other instances on the local network."""
 
-    # TODO: Run period cleanup of clients that haven't been seen in a while.
-
     def __init__(self) -> None:
         """Initializes the model class."""
         super().__init__()
@@ -29,7 +28,7 @@ class ClientDiscovery(QtCore.QAbstractListModel):
 
         self.store_icons()
         self.initialize_socket()
-        self.start_infinitely_broadcasting()
+        self.start_background_processes()
 
     def get_local_ip_addresses(self) -> List[str]:
         """Returns the local IP addresses of the machine. It's a list because some machines have
@@ -92,12 +91,16 @@ class ClientDiscovery(QtCore.QAbstractListModel):
         login_name = os.getlogin()
         return json.dumps({"type": "node_mailer_instance", "name": login_name})
 
-    def start_infinitely_broadcasting(self) -> None:
+    def start_background_processes(self) -> None:
         """Starts the loop that infinitely announces the Nuke instance on the local network
-        so other Nuke instances can find it. Your Nuke is now a radio station!"""
+        so other Nuke instances can find it and the loop that removes old clients."""
         self.broadcast_timer = QtCore.QTimer()
         self.broadcast_timer.timeout.connect(self.broadcast_presence)
         self.broadcast_timer.start(2000)
+
+        self.stale_client_timer = QtCore.QTimer()
+        self.stale_client_timer.timeout.connect(self.remove_stale_clients)
+        self.stale_client_timer.start(30000)
 
     def broadcast_presence(self) -> None:
         """Broadcasts the presence of the Nuke instance on the local network."""
@@ -106,6 +109,16 @@ class ClientDiscovery(QtCore.QAbstractListModel):
             QtNetwork.QHostAddress.Broadcast,
             constants.Ports.BROADCAST.value,
         )
+
+    def remove_stale_clients(self) -> None:
+        """Removes clients that haven't been seen in over 30 seconds."""
+        current_timestamp = datetime.now().timestamp()
+        self.mailing_clients = [
+            client
+            for client in self.mailing_clients
+            if current_timestamp - client.last_seen_timestamp < 30
+        ]
+        self.layoutChanged.emit()
 
     def on_datagram_received(self) -> None:
         """Callback for when a datagram is received. Tries to parse the data and
@@ -134,11 +147,17 @@ class ClientDiscovery(QtCore.QAbstractListModel):
         except KeyError:
             return
 
+        stored_client = self.get_stored_client_from_name(mailer_client_name)
+        if stored_client:
+            self.update_client_last_seen_timestamp(stored_client)
+            return
+
         self.mailing_clients.append(
             NodeMailerClient(
                 mailer_client_name,
                 datagram.senderAddress().toString(),
                 self.is_favorite(mailer_client_name),
+                datetime.now().timestamp(),
             )
         )
         self.sort_by_favorites()
@@ -151,17 +170,37 @@ class ClientDiscovery(QtCore.QAbstractListModel):
     def should_datagram_be_processed(
         self, datagram: QtNetwork.QNetworkDatagram
     ) -> bool:
-        """Checks if the datagram should be processed.
+        """Checks if the datagram should be processed by making sure it's not one we sent ourselves.
 
         Args:
             datagram: The datagram to check.
         """
         ip_address = datagram.senderAddress().toString()
 
-        if ip_address in self.local_addresses:
-            return False
+        return not ip_address in self.local_addresses
 
-        return all(client.ip_address != ip_address for client in self.mailing_clients)
+    def get_stored_client_from_name(self, name: str) -> Union[NodeMailerClient, None]:
+        """Returns the stored client from the given name.
+
+        Args:
+            name: The name of the client to retrieve.
+
+        Returns:
+            The stored client or None is there's no client with the given name.
+        """
+        for client in self.mailing_clients:
+            if client.name == name:
+                return client
+
+        return None
+
+    def update_client_last_seen_timestamp(self, client: NodeMailerClient) -> None:
+        """Updates the last seen timestamp of the client.
+
+        Args:
+            client: The client to update.
+        """
+        client.last_seen_timestamp = datetime.now().timestamp()
 
     def data(self, index: QtCore.QModelIndex, role: Any) -> Union[str, QtGui.QIcon]:
         """Returns the text or icon for the given index and role.
