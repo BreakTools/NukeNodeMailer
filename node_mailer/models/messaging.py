@@ -3,10 +3,15 @@
 Written by Mervin van Brakel, 2024."""
 
 import json
+from typing import List
 
 from PySide2 import QtCore, QtNetwork
 
-from node_mailer.data_models import NodeMailerClient, NodeMailerMail
+from node_mailer.data_models import (
+    NodeMailerClient,
+    NodeMailerMail,
+    ReceivingConnection,
+)
 from node_mailer.models import constants
 
 
@@ -21,6 +26,7 @@ class DirectMessaging(QtCore.QObject):
         super().__init__()
         self.tcp_server = QtNetwork.QTcpServer()
         self.tcp_server.newConnection.connect(self.on_new_connection)
+        self.open_connections: List[ReceivingConnection] = []
         self.start_listening()
 
     def start_listening(self) -> None:
@@ -33,20 +39,32 @@ class DirectMessaging(QtCore.QObject):
     def on_new_connection(self) -> None:
         """Connects the readyRead signal to the on_message_received slot for new connections."""
         new_client = self.tcp_server.nextPendingConnection()
+        receiving_connection = ReceivingConnection(socket=new_client, message="")
         new_client.readyRead.connect(
-            lambda: self.on_message_received(new_client.readAll())
+            lambda: self.on_message_received(receiving_connection)
         )
+        new_client.disconnected.connect(
+            lambda: self.on_connection_closed(receiving_connection)
+        )
+        self.open_connections.append(receiving_connection)
 
-    def on_message_received(self, message: QtCore.QByteArray) -> None:
+    def on_message_received(self, connection: ReceivingConnection) -> None:
         """Emits the processed message_received signal when a message is received.
 
         Args:
-            message: The message that was received.
+            connection: The connection that is sending messages.
         """
-        message_string = message.data().decode("utf-8")
-        mail = self.get_mail_from_message_string(message_string)
+        connection.message += connection.socket.readAll().data().decode("utf-8")
+
+    def on_connection_closed(self, connection: ReceivingConnection) -> None:
+        """Closed connection means we have received all the data. We can now process the message.
+
+        Args:
+            connection: The connection that was closed.
+        """
+        mail = self.get_mail_from_message_string(connection.message)
         self.message_received.emit(mail)
-        # TODO: Use QDataStreams to handle large messages that have multiple readyRead fires.
+        self.open_connections.remove(connection)
 
     def get_mail_from_message_string(self, message_string: str) -> NodeMailerMail:
         """Returns a NodeMailerMessage object from the network-sent string.
@@ -61,9 +79,7 @@ class DirectMessaging(QtCore.QObject):
         return NodeMailerMail(**parsed_message)
 
     def send_mail_to_client(
-        self,
-        mail: NodeMailerMail,
-        client: NodeMailerClient,
+        self, mail: NodeMailerMail, client: NodeMailerClient
     ) -> None:
         """Sends a mail message to another Node Mailer client.
 

@@ -103,7 +103,6 @@ class NodeMailerController(QtCore.QObject):
         Args:
             mail: The mail that was received.
         """
-        print(mail)
         received_mail_popup = ReceivedMailPopup(mail)
         received_mail_popup.exec_()
 

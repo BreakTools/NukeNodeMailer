@@ -166,6 +166,8 @@ class ReceivedMailPopup(NodeMailerWindow):
         )
         scaled_pixmap = pixmap.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
         mail_icon.setPixmap(scaled_pixmap)
+        mail_icon.setAlignment(QtCore.Qt.AlignTop)
+        mail_icon.setContentsMargins(0, 20, 0, 0)
         layout.addWidget(mail_icon)
 
         layout.addWidget(self.get_mail_contents_widget(mail))
@@ -192,8 +194,7 @@ class ReceivedMailPopup(NodeMailerWindow):
 
         message_display_textedit = QtWidgets.QTextEdit(mail.message)
         message_display_textedit.setReadOnly(True)
-        message_display_textedit.setMinimumWidth(320)
-        message_display_textedit.setMaximumHeight(80)
+        message_display_textedit.setFixedSize(320, 100)
         message_display_textedit.setStyleSheet("background-color: white;")
         message_display_textedit.setStyle(NoShadowStyle())
         set_correct_highlight_color(message_display_textedit, "#000BAB")

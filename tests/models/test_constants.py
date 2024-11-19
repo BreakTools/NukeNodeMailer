@@ -10,5 +10,5 @@ def test_mail_history_row():
     assert len(MailHistoryRow) == 3
 
     assert MailHistoryRow.SENDER_NAME.column_index == 0
-    assert MailHistoryRow.SENDER_NAME.display_name == "Sender Name"
+    assert MailHistoryRow.SENDER_NAME.display_name == "Sender name"
     assert MailHistoryRow.SENDER_NAME.dataclass_field == "sender_name"

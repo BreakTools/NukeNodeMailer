@@ -75,6 +75,7 @@ class HistoryWindow(NodeMailerWindow):
         self.table_view.horizontalHeader().setStyle(NoShadowStyle())
         self.table_view.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
         self.table_view.setStyle(NoShadowStyle())
+        self.table_view.verticalScrollBar().setStyleSheet("background-color: #AFAFAF;")
         set_correct_highlight_color(self.table_view, "#AFAFAF")
 
         return self.table_view
