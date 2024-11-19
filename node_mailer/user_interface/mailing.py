@@ -7,7 +7,10 @@ from PySide2 import QtCore, QtWidgets
 from node_mailer.data_models import NodeMailerClient
 from node_mailer.models.discovery import ClientDiscovery
 from node_mailer.styled_widgets.button import NodeMailerButton
-from node_mailer.styled_widgets.utility import NoShadowStyle
+from node_mailer.styled_widgets.utility import (
+    NoShadowStyle,
+    set_correct_highlight_color,
+)
 from node_mailer.styled_widgets.window import NodeMailerWindow
 from node_mailer.user_interface.popups import ErrorPopup
 
@@ -61,6 +64,11 @@ class MailingWindow(NodeMailerWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         widget.setLayout(layout)
 
+        user_select_label = QtWidgets.QLabel("Select user:")
+        user_select_label.setStyleSheet("font-size: 18px;")
+        user_select_label.setStyle(NoShadowStyle())
+        layout.addWidget(user_select_label)
+
         self.list_view = QtWidgets.QListView()
         self.list_view.setModel(discovery_model)
         self.list_view.setIconSize(QtCore.QSize(64, 64))
@@ -72,14 +80,16 @@ class MailingWindow(NodeMailerWindow):
             }
             QListView::item:selected {
             background-color: #000BAB;
-            selection-background-color: white;
+            selection-background-color: #000BAB;
             color: white;
             }
             QListView::item {
             color: black;
             }
         """)
+        set_correct_highlight_color(self.list_view, "#6E6E6E")
         self.list_view.doubleClicked.connect(self.on_item_double_clicked)
+        self.list_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         layout.addWidget(self.list_view)
 
         explainer_text = QtWidgets.QLabel(
@@ -108,7 +118,13 @@ class MailingWindow(NodeMailerWindow):
         layout.addWidget(message_label)
 
         self.message_text_edit = QtWidgets.QTextEdit()
-        self.message_text_edit.setStyleSheet("background-color: white;")
+        self.message_text_edit.setStyleSheet("""
+            background-color: white;
+            selection-color: white;
+        """)
+
+        set_correct_highlight_color(self.message_text_edit, "#000BAB")
+
         layout.addWidget(self.message_text_edit)
 
         return widget
@@ -158,6 +174,6 @@ class MailingWindow(NodeMailerWindow):
             selected_client_indexes[0]
         )
 
-        message = self.message_text_edit.toPlainText()
+        message = self.message_text_edit.toHtml()
 
         self.send_mail.emit(client, message)

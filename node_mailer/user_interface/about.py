@@ -16,4 +16,5 @@ class AboutWindow(NodeMailerWindow):
 
     def get_user_interface(self):
         """Returns the user interface for the About window."""
+        # TODO: Add a proper about window.
         return QtWidgets.QLabel("This is the About window.")

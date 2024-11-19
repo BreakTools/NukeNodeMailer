@@ -17,6 +17,8 @@ class ClientDiscovery(QtCore.QAbstractListModel):
     """Model that handles discovery and storage of other Node Mailer clients.
     Uses UDP broadcasting to find other instances on the local network."""
 
+    # TODO: Run period cleanup of clients that haven't been seen in a while.
+
     def __init__(self) -> None:
         """Initializes the model class."""
         super().__init__()
@@ -64,9 +66,11 @@ class ClientDiscovery(QtCore.QAbstractListModel):
 
     def get_correctly_displaying_icon(self, path: Path) -> QtGui.QIcon:
         """Returns the QIcon that displays nicely in the UI.
-        By default Qt will highlight selected list view icons, but that's not a thing in Window 95.
+        Icons in list views seem to always use the Nuke orange highlight color and I just can't seem to get rid of it.
         As a workaround we need to set both the Normal and the Selected QIcon states to the same icon, because
         Qt only highlights the selected icon if there's no 'Selected' image stored on the QIcon it's displaying.
+        This way the icon will remain the same color when selected. It's not entirely accurate to Windows 95, as in Windows
+        95 the icon would turn blue when selected and the background wouldn't change, but it's close enough I guess.
 
         Args:
             path: The path to the icon.

@@ -6,7 +6,10 @@ from pathlib import Path
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from node_mailer.styled_widgets.utility import NoShadowStyle
+from node_mailer.styled_widgets.utility import (
+    NoShadowStyle,
+    set_correct_highlight_color,
+)
 
 
 class NodeMailerWindow(QtWidgets.QWidget):
@@ -54,7 +57,10 @@ class NodeMailerWindow(QtWidgets.QWidget):
         layout.setContentsMargins(5, 5, 5, 5)
         layout.addWidget(self.get_menu_bar_widget(window_title))
         layout.addWidget(widget_to_display)
+
         self.setStyle(NoShadowStyle())
+        set_correct_highlight_color(self, "#AFAFAF")
+
         self.setLayout(layout)
 
     def store_button_icons(self) -> None:

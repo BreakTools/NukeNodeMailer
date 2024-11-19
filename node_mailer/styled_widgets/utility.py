@@ -19,3 +19,15 @@ class NoShadowStyle(QtWidgets.QProxyStyle):
             pal.setColor(QtGui.QPalette.Text, pal.color(QtGui.QPalette.WindowText))
 
         super().drawItemText(painter, rect, flags, pal, enabled, text, text_role)
+
+
+def set_correct_highlight_color(widget: QtWidgets.QWidget, hex_color: str) -> None:
+    """Nuke seems to want to slap it's signature orange color onto everything the mouse selects.
+    We shall not give into the orange. We must resist. We must fight back. We must paint it blue.
+
+    Args:
+        widget: The widget to set the highlight color on.
+    """
+    palette = widget.palette()
+    palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(hex_color))
+    widget.setPalette(palette)

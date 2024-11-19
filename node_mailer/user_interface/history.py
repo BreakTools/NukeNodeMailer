@@ -2,12 +2,15 @@
 
 Written by Mervin van Brakel, 2024."""
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtWidgets
 
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.history_storage import HistoryStorage
 from node_mailer.styled_widgets.button import NodeMailerButton
-from node_mailer.styled_widgets.utility import NoShadowStyle
+from node_mailer.styled_widgets.utility import (
+    NoShadowStyle,
+    set_correct_highlight_color,
+)
 from node_mailer.styled_widgets.window import NodeMailerWindow
 from node_mailer.user_interface.popups import ErrorPopup
 
@@ -72,11 +75,7 @@ class HistoryWindow(NodeMailerWindow):
         self.table_view.horizontalHeader().setStyle(NoShadowStyle())
         self.table_view.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
         self.table_view.setStyle(NoShadowStyle())
-
-        # Getting rid of Nuke's default orange color....
-        palette = self.table_view.palette()
-        palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor("#AFAFAF"))
-        self.table_view.setPalette(palette)
+        set_correct_highlight_color(self.table_view, "#AFAFAF")
 
         return self.table_view
 

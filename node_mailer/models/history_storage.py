@@ -6,7 +6,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any, List, Union
 
-from PySide2 import QtCore
+from PySide2 import QtCore, QtGui
 
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import MailHistoryRow
@@ -89,6 +89,7 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         Args:
             mail: The mail to store.
         """
+        mail.message = self.get_plain_text_from_html_string(mail.message)
         self.mail_history.insert(0, mail)
         self.database.execute(
             """INSERT INTO node_mailer_history (sender_name, description, encoded_node_string, timestamp)
@@ -97,6 +98,19 @@ class HistoryStorage(QtCore.QAbstractTableModel):
         )
         self.database.commit()
         self.layoutChanged.emit()
+
+    def get_plain_text_from_html_string(self, html_string: str) -> str:
+        """Converts a Qt rich text HTML string to a plain unformatted single line string.
+
+        Args:
+            html_string: The HTML string to convert.
+
+        Returns:
+            The plain text string.
+        """
+        document = QtGui.QTextDocument()
+        document.setHtml(html_string)
+        return document.toPlainText().replace("\n", " ")
 
     def delete_mail(self, index: QtCore.QModelIndex) -> None:
         """Deletes the mail from the database and the model.

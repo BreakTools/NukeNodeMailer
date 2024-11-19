@@ -85,7 +85,9 @@ def test_store_mail(tmp_path):
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
-        message = NodeMailerMail("Test sender", "Test message", "Test node string", 1)
+        message = NodeMailerMail(
+            "Test sender", "<p>Test message</p>", "Test node string", 1
+        )
         history_storage.store_mail(message)
 
         cursor = history_storage.database.cursor()
@@ -100,6 +102,14 @@ def test_store_mail(tmp_path):
         assert timestamp == 1
 
         assert len(history_storage.mail_history) == 1
+
+
+def test_get_plain_text_from_html_string():
+    """Tests the html string is correctly converted to plain text."""
+    history_storage = HistoryStorage()
+    html_string = "<p>Test message</p>"
+    plain_text = history_storage.get_plain_text_from_html_string(html_string)
+    assert plain_text == "Test message"
 
 
 def test_delete_mail(tmp_path):
@@ -145,7 +155,7 @@ def test_data(tmp_path):
         )
         assert (
             history_storage.data(history_storage.index(0, 2), QtCore.Qt.DisplayRole)
-            == 2
+            == "01-01-1970 01:00:02"
         )
         assert (
             history_storage.data(history_storage.index(1, 0), QtCore.Qt.DisplayRole)

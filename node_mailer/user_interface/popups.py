@@ -7,7 +7,10 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import ReceivedMailPopupOption
 from node_mailer.styled_widgets.button import NodeMailerButton
-from node_mailer.styled_widgets.utility import NoShadowStyle
+from node_mailer.styled_widgets.utility import (
+    NoShadowStyle,
+    set_correct_highlight_color,
+)
 from node_mailer.styled_widgets.window import NodeMailerWindow
 
 
@@ -187,13 +190,14 @@ class ReceivedMailPopup(NodeMailerWindow):
         message_text = QtWidgets.QLabel(f"{mail.sender_name} has sent you mail!")
         layout.addWidget(message_text)
 
-        # TODO: Make lineedit display lines breaks/formatting stuff properly.
-        message_display_lineedit = QtWidgets.QLineEdit(mail.message)
-        message_display_lineedit.setReadOnly(True)
-        message_display_lineedit.setMinimumWidth(250)
-        message_display_lineedit.setStyleSheet("background-color: white;")
-        message_display_lineedit.setStyle(NoShadowStyle())
-        layout.addWidget(message_display_lineedit)
+        message_display_textedit = QtWidgets.QTextEdit(mail.message)
+        message_display_textedit.setReadOnly(True)
+        message_display_textedit.setMinimumWidth(320)
+        message_display_textedit.setMaximumHeight(80)
+        message_display_textedit.setStyleSheet("background-color: white;")
+        message_display_textedit.setStyle(NoShadowStyle())
+        set_correct_highlight_color(message_display_textedit, "#000BAB")
+        layout.addWidget(message_display_textedit)
 
         import_text = QtWidgets.QLabel(
             "Would you like to import the sent nodes now or save them in your history?"
