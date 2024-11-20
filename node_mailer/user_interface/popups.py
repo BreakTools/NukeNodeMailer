@@ -25,7 +25,9 @@ class ErrorPopup(NodeMailerWindow):
         Args:
             warning_text: The error message to display.
         """
-        super().__init__(self.get_user_interface(error_text), "Node Mailer: Error")
+        super().__init__(
+            self.get_user_interface(error_text), "Node Mailer: Error", resizable=False
+        )
 
     def get_user_interface(self, error_text: str) -> QtWidgets.QWidget:
         """Returns the user interface for the error popup.
@@ -122,7 +124,11 @@ class ReceivedMailPopup(NodeMailerWindow):
         Args:
             mail: The received mail.
         """
-        super().__init__(self.get_user_interface(mail), "Node Mailer: You've got mail!")
+        super().__init__(
+            self.get_user_interface(mail),
+            "Node Mailer: You've got mail!",
+            resizable=False,
+        )
         self.picked_option = ReceivedMailPopupOption.IGNORE
 
     def get_user_interface(self, mail: NodeMailerMail) -> QtWidgets.QWidget:

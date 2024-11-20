@@ -15,7 +15,12 @@ from node_mailer.styled_widgets.utility import (
 class NodeMailerWindow(QtWidgets.QWidget):
     """Base window class that looks like Windows 95."""
 
-    def __init__(self, widget_to_display: QtWidgets.QWidget, window_title: str) -> None:
+    def __init__(
+        self,
+        widget_to_display: QtWidgets.QWidget,
+        window_title: str,
+        resizable: bool = True,
+    ) -> None:
         """Initializes the stylized Node Mailer window class.
 
         Args:
@@ -23,6 +28,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
             window_title: The title of the window.
         """
         super().__init__()
+        self.resizable = resizable
         self.configure_user_interface(widget_to_display, window_title)
         self.setWindowFlags(
             QtCore.Qt.Window
@@ -229,7 +235,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         """
         if self.is_mouse_on_menu_bar(event):
             self.setCursor(QtCore.Qt.SizeAllCursor)
-        elif self.is_mouse_on_bottom_right_corner(event):
+        elif self.is_mouse_on_bottom_right_corner(event) and self.resizable:
             self.setCursor(QtCore.Qt.SizeFDiagCursor)
         else:
             self.setCursor(QtCore.Qt.ArrowCursor)
@@ -246,7 +252,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         if self.is_mouse_on_menu_bar(event):
             self.currently_moving_window = True
 
-        if self.is_mouse_on_bottom_right_corner(event):
+        if self.is_mouse_on_bottom_right_corner(event) and self.resizable:
             self.currently_resizing_window = True
 
     def mouseReleaseEvent(self, _) -> None:  # noqa: N802
