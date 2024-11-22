@@ -1,1 +1,8 @@
 W95FA font by Alina Sava. Thanks!
+
+Windows 95 icons belong to Microsoft, downloaded from https://archive.org/details/windows-95-all-icons.
+Windows 95 error sound downloaded from YouTube. Please don't sue me Microsoft. I love Windows 95.
+
+You've Got Mail sound downloaded from YouTube, it was originally from AOL, which I guess is now owned by Yahoo?
+
+Buttons were made by me in Photoshop. License is the same as the Node Mailer GitHub repository.

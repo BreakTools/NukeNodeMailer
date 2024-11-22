@@ -10,6 +10,7 @@ from node_mailer.styled_widgets.utility import (
     NoShadowStyle,
     set_correct_highlight_color,
 )
+from node_mailer.audio_handler import play_click_sound
 
 
 class NodeMailerWindow(QtWidgets.QWidget):
@@ -160,6 +161,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         minimize_button.setIcon(self.minimize_button_icon)
         minimize_button.setIconSize(QtCore.QSize(16, 16))
         minimize_button.clicked.connect(self.showMinimized)
+        minimize_button.clicked.connect(play_click_sound)
         minimize_button.pressed.connect(
             lambda: minimize_button.setIcon(self.minimize_button_pressed_icon)
         )
@@ -179,6 +181,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         maximize_button.setContentsMargins(0, 0, 0, 0)
         maximize_button.setIcon(self.maximize_button_icon)
         maximize_button.clicked.connect(self.showMaximized)
+        maximize_button.clicked.connect(play_click_sound)
         maximize_button.pressed.connect(
             lambda: maximize_button.setIcon(self.maximize_button_pressed_icon)
         )
@@ -200,6 +203,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         close_button.setContentsMargins(0, 0, 0, 0)
         close_button.setIcon(self.close_button_icon)
         close_button.clicked.connect(self.close)
+        close_button.clicked.connect(play_click_sound)
         return close_button
 
     def is_mouse_on_menu_bar(self, event) -> bool:

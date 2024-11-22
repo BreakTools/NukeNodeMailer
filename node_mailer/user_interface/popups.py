@@ -4,6 +4,7 @@ from pathlib import Path
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
+from node_mailer.audio_handler import play_error_sound
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import ReceivedMailPopupOption
 from node_mailer.styled_widgets.button import NodeMailerButton
@@ -28,6 +29,7 @@ class ErrorPopup(NodeMailerWindow):
         super().__init__(
             self.get_user_interface(error_text), "Node Mailer: Error", resizable=False
         )
+        play_error_sound()
 
     def get_user_interface(self, error_text: str) -> QtWidgets.QWidget:
         """Returns the user interface for the error popup.
@@ -207,7 +209,7 @@ class ReceivedMailPopup(NodeMailerWindow):
         layout.addWidget(message_display_textedit)
 
         import_text = QtWidgets.QLabel(
-            "Would you like to import the sent nodes now or save them in your history?"
+            "Would you like to save the sent nodes for later or import them into your comp now?"
         )
         import_text.setWordWrap(True)
         layout.addWidget(import_text)

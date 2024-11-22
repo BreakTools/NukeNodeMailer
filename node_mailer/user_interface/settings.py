@@ -82,8 +82,8 @@ class SettingsWindow(NodeMailerWindow):
             "QCheckBox::indicator { background-color: white; }"
         )
         checked = bool(
-            self.settings.value(SettingStrings.AUDIO_ENABLED.value, True)
-        )  # Qt stores boolean values as an integer in a string
+            int(self.settings.value(SettingStrings.AUDIO_ENABLED.value, 1))
+        )  # Qt stores values as strings
         self.audio_checkbox.setChecked(checked)
         self.audio_checkbox.stateChanged.connect(self.on_audio_enabled_changed)
         set_checkbox_styling(self.audio_checkbox)
@@ -118,4 +118,4 @@ class SettingsWindow(NodeMailerWindow):
 
     def on_audio_enabled_changed(self, state: int) -> None:
         """Called when the audio enabled checkbox is changed."""
-        self.settings.setValue(SettingStrings.AUDIO_ENABLED.value, bool(state))
+        self.settings.setValue(SettingStrings.AUDIO_ENABLED.value, state)

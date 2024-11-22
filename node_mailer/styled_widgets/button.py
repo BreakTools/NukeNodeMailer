@@ -6,6 +6,8 @@ from pathlib import Path
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
+from node_mailer.audio_handler import play_click_sound
+
 
 class NodeMailerButton(QtWidgets.QPushButton):
     """Window 95 styled button!"""
@@ -18,7 +20,7 @@ class NodeMailerButton(QtWidgets.QPushButton):
         """
         super().__init__()
         self.configure_styling(text)
-        self.connect_icon_changing_signals()
+        self.connect_signals()
 
     def configure_styling(self, text: str) -> None:
         """Loads the icons and sets the button styling.
@@ -40,10 +42,11 @@ class NodeMailerButton(QtWidgets.QPushButton):
         self.setStyleSheet("background: transparent; border: none; font: 11pt 'W95FA';")
         self.setFixedSize(80, 24)
 
-    def connect_icon_changing_signals(self) -> None:
+    def connect_signals(self) -> None:
         """Connects the signals so the icon changes when needed."""
         self.pressed.connect(self.change_icon_to_pressed)
         self.released.connect(self.change_icon_to_normal)
+        self.clicked.connect(play_click_sound)
 
     def change_icon_to_pressed(self) -> None:
         """Changes the icon to make the button look pressed."""

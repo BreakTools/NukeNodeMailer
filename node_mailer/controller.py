@@ -10,6 +10,7 @@ from pathlib import Path
 from PySide2 import QtCore, QtGui
 
 from . import nuke_interfacing
+from .audio_handler import play_click_sound, play_you_got_mail
 from .data_models import NodeMailerClient, NodeMailerMail
 from .models.constants import ReceivedMailPopupOption
 from .models.discovery import ClientDiscovery
@@ -62,19 +63,23 @@ class NodeMailerController(QtCore.QObject):
     def open_mailing_window(self) -> None:
         """Opens the mailing window."""
         self.mailing_window.show()
+        play_click_sound()
 
     def open_history_window(self) -> None:
         """Opens the history window."""
         self.history_storage_model.retrieve_all_mail_from_database()
         self.history_window.show()
+        play_click_sound()
 
     def open_settings_window(self) -> None:
         """Opens the settings window."""
         self.settings_window.show()
+        play_click_sound()
 
     def open_about_window(self) -> None:
         """Opens the about window."""
         self.about_window.show()
+        play_click_sound()
 
     def send_mail(self, client: NodeMailerClient, message: str) -> None:
         """Retrieves data from other systems and sends it off to the given client.
@@ -110,6 +115,7 @@ class NodeMailerController(QtCore.QObject):
             mail: The mail that was received.
         """
         received_mail_popup = ReceivedMailPopup(mail)
+        play_you_got_mail()
         received_mail_popup.exec_()
 
         if received_mail_popup.picked_option == ReceivedMailPopupOption.IGNORE:
