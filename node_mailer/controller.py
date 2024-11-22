@@ -19,6 +19,7 @@ from .user_interface.about import AboutWindow
 from .user_interface.history import HistoryWindow
 from .user_interface.mailing import MailingWindow
 from .user_interface.popups import ErrorPopup, ReceivedMailPopup
+from .user_interface.settings import SettingsWindow
 
 
 class NodeMailerController(QtCore.QObject):
@@ -48,8 +49,9 @@ class NodeMailerController(QtCore.QObject):
     def initialize_windows(self) -> None:
         """Initializes all windows required for Node Mailer."""
         self.mailing_window = MailingWindow(self.discovery_model)
-        self.about_window = AboutWindow()
         self.history_window = HistoryWindow(self.history_storage_model)
+        self.settings_window = SettingsWindow()
+        self.about_window = AboutWindow()
 
     def connect_signals(self) -> None:
         """Connects the signals of various components together."""
@@ -65,6 +67,10 @@ class NodeMailerController(QtCore.QObject):
         """Opens the history window."""
         self.history_storage_model.retrieve_all_mail_from_database()
         self.history_window.show()
+
+    def open_settings_window(self) -> None:
+        """Opens the settings window."""
+        self.settings_window.show()
 
     def open_about_window(self) -> None:
         """Opens the about window."""

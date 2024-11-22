@@ -2,6 +2,8 @@
 
 Written by Mervin van Brakel, 2024."""
 
+from pathlib import Path
+
 from PySide2 import QtGui, QtWidgets
 
 
@@ -31,3 +33,29 @@ def set_correct_highlight_color(widget: QtWidgets.QWidget, hex_color: str) -> No
     palette = widget.palette()
     palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(hex_color))
     widget.setPalette(palette)
+
+
+def set_checkbox_styling(checkbox_widget: QtWidgets.QCheckBox) -> None:
+    """Configures the styling for a checkbox widget.
+
+    Args:
+        checkbox_widget: The checkbox widget to style.
+    """
+    path_to_check_icon = str(
+        Path(__file__).parent.parent / "resources" / "check.png"
+    ).replace("\\", "/")
+    checkbox_widget.setStyleSheet(
+        f"""
+        QCheckBox::indicator {{
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border: 1px solid #000000;
+        }}
+        QCheckBox::indicator:checked {{
+            image: url({path_to_check_icon});
+            width: 12px;
+            height: 12px;
+        }}
+        """
+    )

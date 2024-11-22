@@ -31,7 +31,7 @@ def test_get_local_ip_addresses():
 def test_get_broadcast_message():
     """Test the broadcast message."""
     discovery = ClientDiscovery()
-    with patch("os.getlogin", return_value="test_user"):
+    with patch.object(QtCore.QSettings, "value", return_value="test_user"):
         assert (
             discovery.get_broadcast_message()
             == '{"type": "node_mailer_instance", "name": "test_user"}'
@@ -40,25 +40,31 @@ def test_get_broadcast_message():
 
 def test_broadcast_presence(qtbot):
     """Tests that the UDP broadcast data is properly sent."""
-    discovery = ClientDiscovery()
-    discovery.broadcast_message = (
-        '{"type": "node_mailer_instance", "name": "test_user"}'
-    )
-    discovery.udp_socket.abort()
+    with patch.object(
+        ClientDiscovery,
+        "get_broadcast_message",
+        return_value='{"type": "node_mailer_instance", "name": "test_user"}',
+    ):
+        discovery = ClientDiscovery()
+        discovery.udp_socket.abort()
 
-    test_listening_socket = QtNetwork.QUdpSocket()
-    test_listening_socket.bind(
-        QtNetwork.QHostAddress(QtNetwork.QHostAddress.AnyIPv4),
-        constants.Ports.BROADCAST.value,
-    )
+        test_listening_socket = QtNetwork.QUdpSocket()
+        test_listening_socket.bind(
+            QtNetwork.QHostAddress(QtNetwork.QHostAddress.AnyIPv4),
+            constants.Ports.BROADCAST.value,
+        )
 
-    with qtbot.waitSignal(test_listening_socket.readyRead, timeout=10000) as blocker:
-        discovery.start_background_processes()
+        with qtbot.waitSignal(
+            test_listening_socket.readyRead, timeout=10000
+        ) as blocker:
+            discovery.broadcast_presence()
 
-    while test_listening_socket.hasPendingDatagrams():
-        datagram = test_listening_socket.receiveDatagram()
+        while test_listening_socket.hasPendingDatagrams():
+            datagram = test_listening_socket.receiveDatagram()
 
-    assert datagram.data().data().decode("utf-8") == discovery.broadcast_message
+        assert (
+            datagram.data().data().decode("utf-8") == discovery.get_broadcast_message()
+        )
 
 
 def test_remove_stale_clients(freezer):
@@ -143,31 +149,31 @@ def test_should_datagram_be_processed():
     assert discovery.should_datagram_be_processed(mock_datagram)
 
 
-def test_get_stored_client_from_name():
+def test_get_stored_client_from_ip():
     """Tests the get stored client function."""
     discovery = ClientDiscovery()
     discovery.mailing_clients = [
         NodeMailerClient("test_name", "fake_ip", False, 0),
     ]
     assert (
-        discovery.get_stored_client_from_name("test_name")
-        == discovery.mailing_clients[0]
+        discovery.get_stored_client_from_ip("fake_ip") == discovery.mailing_clients[0]
     )
-    assert discovery.get_stored_client_from_name("test_name2") is None
+    assert discovery.get_stored_client_from_ip("fake_ip2") is None
 
 
-def test_update_client_last_seen_timestamp(freezer):
-    """Tests the last seen timestamp is properly updated."""
+def test_update_client(freezer):
+    """Tests the last seen timestamp and username are properly updated."""
     discovery = ClientDiscovery()
     discovery.mailing_clients = [
         NodeMailerClient("test_name", "fake_ip", False, 0),
     ]
 
-    discovery.update_client_last_seen_timestamp(discovery.mailing_clients[0])
+    discovery.update_client(discovery.mailing_clients[0], "new_username")
 
     assert (
         discovery.mailing_clients[0].last_seen_timestamp == datetime.now().timestamp()
     )
+    assert discovery.mailing_clients[0].name == "new_username"
 
 
 def test_data():

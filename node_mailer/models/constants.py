@@ -31,6 +31,8 @@ class SettingStrings(Enum):
     """Enum that stores setting strings for use with QSettings."""
 
     FAVORITES = "node_mailer/favorites"
+    CUSTOM_USERNAME = "node_mailer/custom_username"
+    AUDIO_ENABLED = "node_mailer/audio_enabled"
 
 
 class ReceivedMailPopupOption(Enum):

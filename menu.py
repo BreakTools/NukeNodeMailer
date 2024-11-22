@@ -24,6 +24,11 @@ def create_mailer_menu() -> None:
     )
     mailer_menu.addCommand("-", "", "")
     mailer_menu.addCommand(
+        "Settings",
+        "global node_mailer_controller;node_mailer_controller.open_settings_window()",
+        "",
+    )
+    mailer_menu.addCommand(
         "About...",
         "global node_mailer_controller;node_mailer_controller.open_about_window()",
         "",

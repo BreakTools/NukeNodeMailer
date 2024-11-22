@@ -1,1 +1,1 @@
-from . import about, history, mailing, popups
+from . import about, history, mailing, popups, settings
