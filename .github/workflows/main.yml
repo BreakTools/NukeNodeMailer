@@ -20,7 +20,7 @@ jobs:
 
       - name: Create ZIP with menu.py and node_mailer
         run: |
-          zip -r node_mailer_with_menu.zip node_mailer menu.py
+          zip -r NukeNodeMailer.zip node_mailer menu.py
 
       - name: Upload ZIP to release
         uses: actions/upload-release-asset@v1
