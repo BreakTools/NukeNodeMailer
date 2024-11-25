@@ -1,4 +1,4 @@
-"""All the code responsible for interfacing with Nuke. Yes this whole Nuke plugin only has 2 lines
+"""All the code responsible for interfacing with Nuke. Yes this whole Nuke plugin only has 3 lines
 of code that actually use the Nuke API lol.
 
 Written by Mervin van Brakel, 2024."""
