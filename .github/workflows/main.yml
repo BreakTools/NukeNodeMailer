@@ -1,0 +1,31 @@
+name: Attach node_mailer with menu.py to Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  attach-zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Replace [VERSION_NUMBER] with release name in about screen
+        run: |
+          RELEASE_NAME="${{ github.event.release.name }}"
+          sed -i "s/\[VERSION_NUMBER\]/$RELEASE_NAME/g" ./node_mailer/user_interface/about.py
+
+      - name: Create ZIP with menu.py and node_mailer
+        run: |
+          zip -r node_mailer_with_menu.zip node_mailer menu.py
+
+      - name: Upload ZIP to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./NukeNodeMailer.zip
+          asset_name: NukeNodeMailer.zip
+          asset_content_type: application/zip
