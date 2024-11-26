@@ -12,7 +12,7 @@ from node_mailer.styled_widgets.utility import (
     set_correct_highlight_color,
 )
 from node_mailer.styled_widgets.window import NodeMailerWindow
-from node_mailer.user_interface.popups import ErrorPopup
+from node_mailer.user_interface.popups import display_error_popup
 
 
 class HistoryWindow(NodeMailerWindow):
@@ -106,8 +106,7 @@ class HistoryWindow(NodeMailerWindow):
         """Imports the selected mail from the history table."""
         selected_index = self.get_selected_index()
         if not selected_index:
-            error_popup = ErrorPopup("No mail selected to import!")
-            error_popup.exec_()
+            display_error_popup("No mail selected to import!")
             return
 
         selected_mail = self.table_view.model().get_mailer_data_from_index(
@@ -119,8 +118,7 @@ class HistoryWindow(NodeMailerWindow):
         """Deletes the selected mail from the history storage model."""
         selected_index = self.get_selected_index()
         if not selected_index:
-            error_popup = ErrorPopup("No mail selected to delete!")
-            error_popup.exec_()
+            display_error_popup("No mail selected to delete!")
             return
 
         self.table_view.model().delete_mail(selected_index)

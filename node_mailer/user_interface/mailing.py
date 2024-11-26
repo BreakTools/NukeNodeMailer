@@ -12,7 +12,7 @@ from node_mailer.styled_widgets.utility import (
     set_correct_highlight_color,
 )
 from node_mailer.styled_widgets.window import NodeMailerWindow
-from node_mailer.user_interface.popups import ErrorPopup
+from node_mailer.user_interface.popups import display_error_popup
 
 
 class MailingWindow(NodeMailerWindow):
@@ -167,10 +167,7 @@ class MailingWindow(NodeMailerWindow):
         selected_client_indexes = self.list_view.selectionModel().selectedIndexes()
 
         if not selected_client_indexes:
-            error_popup = ErrorPopup(
-                "You haven't selected a client to send the mail to!"
-            )
-            error_popup.exec_()
+            display_error_popup("You haven't selected a client to send the mail to!")
             return
 
         client = self.list_view.model().get_mailer_client_from_index(

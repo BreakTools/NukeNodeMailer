@@ -115,6 +115,16 @@ class ErrorPopup(NodeMailerWindow):
         super().closeEvent(event)
 
 
+def display_error_popup(error_text: str) -> None:
+    """Displays an error popup with the given error text.
+
+    Args:
+        error_text: The error message to display.
+    """
+    error_popup = ErrorPopup(error_text)
+    error_popup.exec_()
+
+
 class ReceivedMailPopup(NodeMailerWindow):
     """A popup window that display the received mail prompt."""
 

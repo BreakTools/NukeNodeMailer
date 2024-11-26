@@ -19,7 +19,7 @@ from .models.messaging import DirectMessaging
 from .user_interface.about import AboutWindow
 from .user_interface.history import HistoryWindow
 from .user_interface.mailing import MailingWindow
-from .user_interface.popups import ErrorPopup, ReceivedMailPopup
+from .user_interface.popups import ReceivedMailPopup, display_error_popup
 from .user_interface.settings import SettingsWindow
 
 
@@ -91,8 +91,7 @@ class NodeMailerController(QtCore.QObject):
         encoded_node_string = nuke_interfacing.get_selected_nodes_as_encoded_string()
 
         if not encoded_node_string:
-            error_popup = ErrorPopup("You don't have any nodes selected to mail!")
-            error_popup.exec_()
+            display_error_popup("You don't have any nodes selected to mail!")
             return
 
         unix_timestamp = int(datetime.now().timestamp())
@@ -103,7 +102,12 @@ class NodeMailerController(QtCore.QObject):
             node_string=encoded_node_string,
             timestamp=unix_timestamp,
         )
-        self.direct_messaging_model.send_mail_to_client(mail, client)
+
+        try:
+            self.direct_messaging_model.send_mail_to_client(mail, client)
+        except ConnectionError as error_message:
+            display_error_popup(f"Error: {error_message}")
+            return
 
         self.mailing_window.message_text_edit.clear()
         self.mailing_window.close()

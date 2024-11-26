@@ -25,8 +25,8 @@ def get_selected_nodes_as_encoded_string() -> Union[str, None]:
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_nuke_file = Path(temp_dir) / "nodes.nk"
         nuke.nodeCopy(str(temp_nuke_file))
-        node_string = temp_nuke_file.read_text()
-        return base64.b64encode(node_string.encode("ascii")).decode("ascii")
+        node_string = temp_nuke_file.read_text(encoding="utf-8")
+        return base64.b64encode(node_string.encode("utf-8")).decode("utf-8")
 
 
 def paste_nodes_from_encoded_string(encoded_node_string: str) -> None:
@@ -37,10 +37,10 @@ def paste_nodes_from_encoded_string(encoded_node_string: str) -> None:
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         decoded_node_string = base64.b64decode(
-            encoded_node_string.encode("ascii")
-        ).decode("ascii")
+            encoded_node_string.encode("utf-8")
+        ).decode("utf-8")
         temp_nuke_file = Path(temp_dir) / "nodes.nk"
-        temp_nuke_file.write_text(decoded_node_string)
+        temp_nuke_file.write_text(decoded_node_string, encoding="utf-8")
         nuke.nodePaste(str(temp_nuke_file))
 
 

@@ -90,7 +90,10 @@ class DirectMessaging(QtCore.QObject):
         tcp_socket = QtNetwork.QTcpSocket()
         tcp_socket.connectToHost(client.ip_address, constants.Ports.MESSAGING.value)
 
-        tcp_socket.waitForConnected(2000)
+        if not tcp_socket.waitForConnected(2000):
+            msg = f"Could not connect to client {client.name}. Is it still running?"
+            raise ConnectionError(msg)
+
         tcp_socket.write(mail.as_json().encode("utf-8"))
         tcp_socket.waitForBytesWritten()
         tcp_socket.disconnectFromHost()
