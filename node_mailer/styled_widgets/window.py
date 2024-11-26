@@ -6,11 +6,11 @@ from pathlib import Path
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
+from node_mailer.audio_handler import play_click_sound
 from node_mailer.styled_widgets.utility import (
     NoShadowStyle,
     set_correct_highlight_color,
 )
-from node_mailer.audio_handler import play_click_sound
 
 
 class NodeMailerWindow(QtWidgets.QWidget):
@@ -180,7 +180,7 @@ class NodeMailerWindow(QtWidgets.QWidget):
         maximize_button.setFocusPolicy(QtCore.Qt.NoFocus)
         maximize_button.setContentsMargins(0, 0, 0, 0)
         maximize_button.setIcon(self.maximize_button_icon)
-        maximize_button.clicked.connect(self.showMaximized)
+        maximize_button.clicked.connect(self.on_maximize_button_clicked)
         maximize_button.clicked.connect(play_click_sound)
         maximize_button.pressed.connect(
             lambda: maximize_button.setIcon(self.maximize_button_pressed_icon)
@@ -243,6 +243,10 @@ class NodeMailerWindow(QtWidgets.QWidget):
             self.setCursor(QtCore.Qt.SizeFDiagCursor)
         else:
             self.setCursor(QtCore.Qt.ArrowCursor)
+
+    def on_maximize_button_clicked(self) -> None:
+        """Toggles the window between maximized and normal state."""
+        self.showNormal() if self.isMaximized() else self.showMaximized()
 
     def mousePressEvent(self, event) -> None:  # noqa: N802
         """Processes the mouse press event for handling dragging and resize logic.

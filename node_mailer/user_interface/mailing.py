@@ -41,6 +41,7 @@ class MailingWindow(NodeMailerWindow):
             The widget with the mailing user interface.
         """
         widget = QtWidgets.QWidget()
+        widget.setMinimumWidth(340)
         layout = QtWidgets.QVBoxLayout()
         widget.setLayout(layout)
 
@@ -90,6 +91,8 @@ class MailingWindow(NodeMailerWindow):
         set_correct_highlight_color(self.list_view, "#6E6E6E")
         self.list_view.doubleClicked.connect(self.on_item_double_clicked)
         self.list_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.list_view.setResizeMode(QtWidgets.QListView.Adjust)
+        self.list_view.setGridSize(QtCore.QSize(100, 100))
         layout.addWidget(self.list_view)
 
         explainer_text = QtWidgets.QLabel(
