@@ -1,0 +1,17 @@
+Thanks for downloading Node Mailer! Follow these instructions to add it to Nuke:
+
+Step 1: Locate your .nuke folder. Nuke scans this folder when it starts up, so our files should go there.
+These are the default locations:
+- Linux: /home/login name/.nuke
+- macOS: /Users/login name/.nuke
+- Windows: C:\Users\user name\.nuke
+
+Step 2: Copy the NukeNodeMailer folder into your .nuke folder.
+
+Step 3: Copy the menu.py file into your .nuke folder. You might already have a menu.py file there, in this case you should open up the existing file and add the following line at the bottom:
+
+nuke.pluginAddPath("./NukeNodeMailer")
+
+
+
+That's it! You can now use Node Mailer. It's not much fun by yourself, so make sure you get some other people on your local network to install it as well :)
