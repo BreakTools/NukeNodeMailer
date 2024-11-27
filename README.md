@@ -10,13 +10,13 @@ A Nuke plugin for mailing nodes over the local network, themed to look like the 
 - ...enjoy the refreshing nostalgia of Windows 95.
 
 ## Mailing
-Nodes can be mailed to other users who've got Node Mailer installed. Users are auto-discovered on the local network, so no server, database or shared file system is required!
+Nodes can be mailed to other users who've got Node Mailer installed. Users are auto-discovered on the local network so no server, database or shared file system is required!
 <p align="center">
  <img src="https://github.com/user-attachments/assets/e4eb372f-9c06-4ce1-9388-4a7f5ca944e2" />
 </p>
 
 ## History
-Sent nodes are stored in your history, so you can always reimport nodes you've been mailed previously!
+Received nodes are stored in your history, so you can always reimport nodes you've been mailed previously!
 <p align="center">
  <img src="https://github.com/user-attachments/assets/7743d43a-4520-4872-9093-16bcd0b97921" />
 </p>
