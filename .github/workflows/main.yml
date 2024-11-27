@@ -21,9 +21,13 @@ jobs:
           RELEASE_NAME="${{ github.event.release.name }}"
           sed -i "s/\[VERSION_NUMBER\]/$RELEASE_NAME/g" ./node_mailer/user_interface/about.py
 
-      - name: Create ZIP with menu.py and node_mailer
+      - name: Create release ZIP
         run: |
-          zip -r NukeNodeMailer.zip node_mailer menu.py
+          mkdir -p NukeNodeMailer
+          cp -r node_mailer NukeNodeMailer/
+          cp menu.py NukeNodeMailer/
+          cp installation/* .
+          zip -r NukeNodeMailer.zip NukeNodeMailer installation_instructions.txt menu.py
 
       - name: Upload ZIP to release
         uses: softprops/action-gh-release@v2
