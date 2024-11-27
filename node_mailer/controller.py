@@ -12,7 +12,7 @@ from PySide2 import QtCore, QtGui
 from . import nuke_interfacing
 from .audio_handler import play_click_sound, play_you_got_mail
 from .data_models import NodeMailerClient, NodeMailerMail
-from .models.constants import ReceivedMailPopupOption
+from .models.constants import ReceivedMailPopupOption, SettingStrings
 from .models.discovery import ClientDiscovery
 from .models.history_storage import HistoryStorage
 from .models.messaging import DirectMessaging
@@ -96,8 +96,11 @@ class NodeMailerController(QtCore.QObject):
 
         unix_timestamp = int(datetime.now().timestamp())
 
+        settings = QtCore.QSettings()
         mail = NodeMailerMail(
-            sender_name=os.getlogin(),
+            sender_name=settings.value(
+                SettingStrings.CUSTOM_USERNAME.value, os.getlogin()
+            ),
             message=message,
             node_string=encoded_node_string,
             timestamp=unix_timestamp,
