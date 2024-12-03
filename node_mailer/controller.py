@@ -19,7 +19,11 @@ from .models.messaging import DirectMessaging
 from .user_interface.about import AboutWindow
 from .user_interface.history import HistoryWindow
 from .user_interface.mailing import MailingWindow
-from .user_interface.popups import ReceivedMailPopup, display_error_popup
+from .user_interface.popups import (
+    ReceivedMailPopup,
+    display_error_popup,
+    display_yes_no_popup,
+)
 from .user_interface.settings import SettingsWindow
 
 
@@ -59,11 +63,23 @@ class NodeMailerController(QtCore.QObject):
         self.history_window.import_mail.connect(nuke_interfacing.import_mail)
         self.mailing_window.send_mail.connect(self.send_mail)
         self.direct_messaging_model.message_received.connect(self.mail_received)
+        self.direct_messaging_model.shutdown_received.connect(self.shutdown_received)
 
     def open_mailing_window(self) -> None:
         """Opens the mailing window."""
-        self.mailing_window.show()
         play_click_sound()
+
+        if self.discovery_model.running:
+            self.mailing_window.show()
+            return
+
+        should_start = display_yes_no_popup(
+            "Node Mailer is not currently running in this Nuke session. Do you want to start it? This will disable Node Mailer in other running Nuke sessions."
+        )
+        if should_start:
+            self.direct_messaging_model.send_shutdown_message()
+            self.reinitialize_systems()
+            self.mailing_window.show()
 
     def open_history_window(self) -> None:
         """Opens the history window."""
@@ -115,6 +131,15 @@ class NodeMailerController(QtCore.QObject):
         self.mailing_window.message_text_edit.clear()
         self.mailing_window.close()
 
+    def reinitialize_systems(self) -> None:
+        """Kills other Node Mailer process if running and, after a slight delay,
+        reinitializes all systems/models required for Node Mailer to function.
+        Delay is there to give the other Node Mailer instance some time to shut down."""
+        self.direct_messaging_model.send_shutdown_message()
+        QtCore.QTimer.singleShot(1000, self.discovery_model.initialize_socket)
+        QtCore.QTimer.singleShot(1000, self.discovery_model.start_background_processes)
+        QtCore.QTimer.singleShot(1000, self.direct_messaging_model.start_listening)
+
     def mail_received(self, mail: NodeMailerMail) -> None:
         """Handles a received mail using the received mail popup.
 
@@ -132,3 +157,10 @@ class NodeMailerController(QtCore.QObject):
 
         if received_mail_popup.picked_option == ReceivedMailPopupOption.IMPORT:
             nuke_interfacing.import_mail(mail)
+
+    def shutdown_received(self) -> None:
+        """Shuts down Node Mailer systems when we receive a shutdown message so another
+        Node Mailer instance can bind to the ports again."""
+        self.discovery_model.uninitialize_socket()
+        self.direct_messaging_model.stop_listening()
+        self.mailing_window.close()
