@@ -49,7 +49,7 @@ class DirectMessaging(QtCore.QObject):
             lambda: self.on_message_received(receiving_connection)
         )
         new_client.disconnected.connect(
-            lambda: self.on_connection_closed(receiving_connection)
+            lambda: self.process_received_message(receiving_connection)
         )
         self.open_connections.append(receiving_connection)
 
@@ -61,34 +61,24 @@ class DirectMessaging(QtCore.QObject):
         """
         connection.message += connection.socket.readAll().data().decode("utf-8")
 
-    def on_connection_closed(self, connection: ReceivingConnection) -> None:
-        """Closed connection means we have received all the data. We can now process the message.
+    def process_received_message(self, connection: ReceivingConnection) -> None:
+        """Processes the complete received message we have stored when the sending connection closes.
 
         Args:
             connection: The connection that was closed.
         """
-        # TODO: Add a bit of validation here to make sure the message is properly formatted.
-        parsed_message = json.loads(connection.message)
+        try:
+            parsed_message = json.loads(connection.message)
+        except json.JSONDecodeError:
+            return
 
         if parsed_message["type"] == "shutdown":
             self.shutdown_received.emit()
             return
 
-        mail = self.get_mail_from_message_string(parsed_message["mail"])
+        mail = NodeMailerMail(**parsed_message["mail"])
         self.message_received.emit(mail)
         self.open_connections.remove(connection)
-
-    def get_mail_from_message_string(self, message_string: str) -> NodeMailerMail:
-        """Returns a NodeMailerMessage object from the network-sent string.
-
-        Args:
-            message_string: The JSON message in string form.
-
-        Returns:
-            The NodeMailerMessage object.
-        """
-        parsed_message = json.loads(message_string)
-        return NodeMailerMail(**parsed_message)
 
     def send_mail_to_client(
         self, mail: NodeMailerMail, client: NodeMailerClient
@@ -127,3 +117,4 @@ class DirectMessaging(QtCore.QObject):
         tcp_socket.waitForBytesWritten()
         tcp_socket.disconnectFromHost()
         tcp_socket.close()
+
