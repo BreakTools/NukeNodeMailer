@@ -27,9 +27,9 @@ class NodeMailerMail:
     node_string: str
     timestamp: int
 
-    def as_json(self) -> str:
-        """Returns the message as a JSON string."""
-        return json.dumps(asdict(self))
+    def as_dict(self) -> dict:
+        """Returns the message as a dictionary."""
+        return asdict(self)
 
 
 @dataclass

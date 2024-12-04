@@ -125,6 +125,136 @@ def display_error_popup(error_text: str) -> None:
     error_popup.exec_()
 
 
+class YesNoPopup(NodeMailerWindow):
+    """A popup window that displays a yes/no question."""
+
+    closed = QtCore.Signal()
+
+    def __init__(self, question_text: str) -> None:
+        """Initializes the yes/no popup.
+
+        Args:
+            question_text: The question to display.
+        """
+        super().__init__(
+            self.get_user_interface(question_text),
+            "Node Mailer: Question",
+            resizable=False,
+        )
+        self.picked_option = False
+
+    def get_user_interface(self, question_text: str) -> QtWidgets.QWidget:
+        """Returns the user interface for the yes/no popup.
+
+        Args:
+            question_text: The question to display.
+
+        Returns:
+            The widget with the yes/no popup user interface.
+        """
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        widget.setLayout(layout)
+
+        layout.addWidget(self.get_question_widget(question_text))
+        layout.addWidget(self.get_bottom_buttons())
+
+        return widget
+
+    def get_question_widget(self, question_text: str) -> QtWidgets.QWidget:
+        """Returns the question widget for the yes/no popup.
+
+        Args:
+            question_text: The question to display.
+
+        Returns:
+            The widget with the question.
+        """
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout()
+        layout.setContentsMargins(20, 0, 20, 0)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setSpacing(20)
+        widget.setLayout(layout)
+
+        question_icon = QtWidgets.QLabel()
+        pixmap = QtGui.QPixmap(
+            str(Path(__file__).parent.parent / "resources" / "question.png")
+        )
+        scaled_pixmap = pixmap.scaled(48, 48, QtCore.Qt.KeepAspectRatio)
+        question_icon.setPixmap(scaled_pixmap)
+        layout.addWidget(question_icon)
+
+        question_text = QtWidgets.QLabel(question_text)
+        question_text.setWordWrap(True)
+        question_text.setMinimumWidth(250)
+        layout.addWidget(question_text)
+
+        return widget
+
+    def get_bottom_buttons(self) -> QtWidgets.QWidget:
+        """Returns the bottom buttons for the yes/no popup.
+
+        Returns:
+            The widget with the bottom buttons.
+        """
+        widget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setAlignment(QtCore.Qt.AlignRight)
+        widget.setLayout(layout)
+
+        no_button = NodeMailerButton("No")
+        no_button.clicked.connect(self.on_no_clicked)
+        layout.addWidget(no_button)
+
+        yes_button = NodeMailerButton("Yes")
+        yes_button.clicked.connect(self.on_yes_clicked)
+        layout.addWidget(yes_button)
+
+        return widget
+
+    def on_no_clicked(self) -> None:
+        """Handles the no button being clicked."""
+        self.picked_option = False
+        self.close()
+
+    def on_yes_clicked(self) -> None:
+        """Handles the yes button being clicked."""
+        self.picked_option = True
+        self.close()
+
+    def exec_(self):
+        """Executes the yes/no popup. Mimics the behavior of a blocking dialog."""
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
+        loop = QtCore.QEventLoop()
+        self.closed.connect(loop.quit)
+        loop.exec_()
+
+    def closeEvent(self, event):  # noqa: N802
+        """Emits the closed signal when the window is closed."""
+        self.closed.emit()
+        super().closeEvent(event)
+
+
+def display_yes_no_popup(question_text: str) -> bool:
+    """Displays a yes/no popup with the given question text.
+
+    Args:
+        question_text: The question to display.
+
+    Returns:
+        True if the user clicked yes, False if the user clicked no.
+    """
+    yes_no_popup = YesNoPopup(question_text)
+    yes_no_popup.exec_()
+    return yes_no_popup.picked_option
+
+
 class ReceivedMailPopup(NodeMailerWindow):
     """A popup window that display the received mail prompt."""
 

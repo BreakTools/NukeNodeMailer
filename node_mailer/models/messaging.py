@@ -20,6 +20,7 @@ class DirectMessaging(QtCore.QObject):
     Uses TCP to receive/send data."""
 
     message_received = QtCore.Signal(NodeMailerMail)
+    shutdown_received = QtCore.Signal()
 
     def __init__(self) -> None:
         """Initializes the messaging handler."""
@@ -36,6 +37,10 @@ class DirectMessaging(QtCore.QObject):
             port=constants.Ports.MESSAGING.value,
         )
 
+    def stop_listening(self) -> None:
+        """Stops listening for incoming messages."""
+        self.tcp_server.close()
+
     def on_new_connection(self) -> None:
         """Connects the readyRead signal to the on_message_received slot for new connections."""
         new_client = self.tcp_server.nextPendingConnection()
@@ -44,7 +49,7 @@ class DirectMessaging(QtCore.QObject):
             lambda: self.on_message_received(receiving_connection)
         )
         new_client.disconnected.connect(
-            lambda: self.on_connection_closed(receiving_connection)
+            lambda: self.process_received_message(receiving_connection)
         )
         self.open_connections.append(receiving_connection)
 
@@ -56,27 +61,24 @@ class DirectMessaging(QtCore.QObject):
         """
         connection.message += connection.socket.readAll().data().decode("utf-8")
 
-    def on_connection_closed(self, connection: ReceivingConnection) -> None:
-        """Closed connection means we have received all the data. We can now process the message.
+    def process_received_message(self, connection: ReceivingConnection) -> None:
+        """Processes the complete received message we have stored when the sending connection closes.
 
         Args:
             connection: The connection that was closed.
         """
-        mail = self.get_mail_from_message_string(connection.message)
+        try:
+            parsed_message = json.loads(connection.message)
+        except json.JSONDecodeError:
+            return
+
+        if parsed_message["type"] == "shutdown":
+            self.shutdown_received.emit()
+            return
+
+        mail = NodeMailerMail(**parsed_message["mail"])
         self.message_received.emit(mail)
         self.open_connections.remove(connection)
-
-    def get_mail_from_message_string(self, message_string: str) -> NodeMailerMail:
-        """Returns a NodeMailerMessage object from the network-sent string.
-
-        Args:
-            message_string: The JSON message in string form.
-
-        Returns:
-            The NodeMailerMessage object.
-        """
-        parsed_message = json.loads(message_string)
-        return NodeMailerMail(**parsed_message)
 
     def send_mail_to_client(
         self, mail: NodeMailerMail, client: NodeMailerClient
@@ -90,10 +92,29 @@ class DirectMessaging(QtCore.QObject):
         tcp_socket = QtNetwork.QTcpSocket()
         tcp_socket.connectToHost(client.ip_address, constants.Ports.MESSAGING.value)
 
-        if not tcp_socket.waitForConnected(2000):
+        if not tcp_socket.waitForConnected(500):
             msg = f"Could not connect to client {client.name}. Is it still running?"
             raise ConnectionError(msg)
 
-        tcp_socket.write(mail.as_json().encode("utf-8"))
+        dict_mail = {"type": "mail"}
+        dict_mail["mail"] = mail.as_dict()
+
+        tcp_socket.write(json.dumps(dict_mail).encode("utf-8"))
         tcp_socket.waitForBytesWritten()
         tcp_socket.disconnectFromHost()
+        tcp_socket.close()
+
+    def send_shutdown_message(self) -> None:
+        """Sends a shutdown message to the local running Node Mailer instance."""
+        tcp_socket = QtNetwork.QTcpSocket()
+        tcp_socket.connectToHost("localhost", constants.Ports.MESSAGING.value)
+
+        if not tcp_socket.waitForConnected(2000):
+            return
+
+        shutdown_message = {"type": "shutdown"}
+        tcp_socket.write(json.dumps(shutdown_message).encode("utf-8"))
+        tcp_socket.waitForBytesWritten()
+        tcp_socket.disconnectFromHost()
+        tcp_socket.close()
+

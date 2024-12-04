@@ -21,6 +21,7 @@ class ClientDiscovery(QtCore.QAbstractListModel):
     def __init__(self) -> None:
         """Initializes the model class."""
         super().__init__()
+        self.running = False
         self.mailing_clients: List[NodeMailerClient] = []
 
         self.local_addresses = self.get_local_ip_addresses()
@@ -52,6 +53,14 @@ class ClientDiscovery(QtCore.QAbstractListModel):
             constants.Ports.BROADCAST.value,
         )
         self.udp_socket.readyRead.connect(self.on_datagram_received)
+        self.running = self.udp_socket.state() == QtNetwork.QAbstractSocket.BoundState
+
+    def uninitialize_socket(self) -> None:
+        """Uninitializes the socket and disconnects the signals."""
+        self.udp_socket.readyRead.disconnect(self.on_datagram_received)
+        self.udp_socket.close()
+        self.running = False
+        self.mailing_clients = []
 
     def store_icons(self) -> None:
         """Stores the icons this model should return."""
