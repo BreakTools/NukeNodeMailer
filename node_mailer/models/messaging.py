@@ -109,7 +109,7 @@ class DirectMessaging(QtCore.QObject):
         tcp_socket = QtNetwork.QTcpSocket()
         tcp_socket.connectToHost("localhost", constants.Ports.MESSAGING.value)
 
-        if not tcp_socket.waitForConnected(2000):
+        if not tcp_socket.waitForConnected(500):
             return
 
         shutdown_message = {"type": "shutdown"}
@@ -117,4 +117,3 @@ class DirectMessaging(QtCore.QObject):
         tcp_socket.waitForBytesWritten()
         tcp_socket.disconnectFromHost()
         tcp_socket.close()
-
