@@ -1,5 +1,5 @@
 # Node Mailer 
-A Nuke plugin for mailing nodes over the local network, themed to look like the world's greatest operating system: Windows 95!
+A Nuke plugin for mailing nodes over the local network, themed to look like the world's greatest operating system: Windows 95! Check out the [launch trailer](https://youtu.be/RmE2NA1pV_o?si=bDD4zgBIcHCKERw_)!
 
 ![Nuke15 0_TRypR3m5ej](https://github.com/user-attachments/assets/358e29e5-ca23-4968-a8b2-414d04582404)
 
