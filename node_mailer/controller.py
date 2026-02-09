@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from PySide2 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 from . import nuke_interfacing
 from .audio_handler import play_click_sound, play_you_got_mail

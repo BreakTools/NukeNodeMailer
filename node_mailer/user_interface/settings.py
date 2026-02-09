@@ -4,7 +4,7 @@ Written by Mervin van Brakel, 2024."""
 
 import os
 
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from node_mailer.models.constants import SettingStrings
 from node_mailer.styled_widgets.button import NodeMailerButton
@@ -60,10 +60,12 @@ class SettingsWindow(NodeMailerWindow):
             self.settings.value(SettingStrings.CUSTOM_USERNAME.value, os.getlogin())
         )
         self.username_lineedit.textChanged.connect(self.on_username_changed)
-        self.username_lineedit.setStyleSheet("""
+        self.username_lineedit.setStyleSheet(
+            """
             background-color: white;
             selection-color: white;
-        """)
+        """
+        )
         set_correct_highlight_color(self.username_lineedit, "#000BAB")
 
         layout.addWidget(self.username_lineedit)

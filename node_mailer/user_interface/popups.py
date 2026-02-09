@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 
 from node_mailer.audio_handler import play_error_sound
 from node_mailer.data_models import NodeMailerMail

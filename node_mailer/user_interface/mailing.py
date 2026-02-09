@@ -2,7 +2,7 @@
 
 Written by Mervin van Brakel, 2024."""
 
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from node_mailer.data_models import NodeMailerClient
 from node_mailer.models.discovery import ClientDiscovery
@@ -74,7 +74,8 @@ class MailingWindow(NodeMailerWindow):
         self.list_view.setModel(discovery_model)
         self.list_view.setIconSize(QtCore.QSize(64, 64))
         self.list_view.setViewMode(QtWidgets.QListView.IconMode)
-        self.list_view.setStyleSheet("""
+        self.list_view.setStyleSheet(
+            """
             QListView {
             background-color: white;
             selection-background-color: white;
@@ -87,7 +88,8 @@ class MailingWindow(NodeMailerWindow):
             QListView::item {
             color: black;
             }
-        """)
+        """
+        )
         set_correct_highlight_color(self.list_view, "#6E6E6E")
         self.list_view.doubleClicked.connect(self.on_item_double_clicked)
         self.list_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
@@ -121,10 +123,12 @@ class MailingWindow(NodeMailerWindow):
         layout.addWidget(message_label)
 
         self.message_text_edit = QtWidgets.QTextEdit()
-        self.message_text_edit.setStyleSheet("""
+        self.message_text_edit.setStyleSheet(
+            """
             background-color: white;
             selection-color: white;
-        """)
+        """
+        )
 
         set_correct_highlight_color(self.message_text_edit, "#000BAB")
 

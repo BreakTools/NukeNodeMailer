@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, List, Union
 
-from PySide2 import QtCore, QtGui, QtNetwork
+from PySide6 import QtCore, QtGui, QtNetwork
 
 from node_mailer.data_models import NodeMailerClient
 from node_mailer.models import constants
@@ -104,7 +104,8 @@ class ClientDiscovery(QtCore.QAbstractListModel):
 
     def start_background_processes(self) -> None:
         """Starts the loop that infinitely announces the Nuke instance on the local network
-        so other Nuke instances can find it and starts the loop that removes old clients."""
+        so other Nuke instances can find it and starts the loop that removes old clients.
+        """
         self.broadcast_timer = QtCore.QTimer()
         self.broadcast_timer.timeout.connect(self.broadcast_presence)
         self.broadcast_timer.start(15000)

@@ -4,7 +4,7 @@ Written by Mervin van Brakel, 2024."""
 
 from pathlib import Path
 
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 
 class NoShadowStyle(QtWidgets.QProxyStyle):
@@ -15,7 +15,9 @@ class NoShadowStyle(QtWidgets.QProxyStyle):
     adding that manually to any widget that has both text and a custom stylesheet.
     """
 
-    def drawItemText(self, painter, rect, flags, pal, enabled, text, text_role):  # noqa: N802, PLR0913
+    def drawItemText(
+        self, painter, rect, flags, pal, enabled, text, text_role
+    ):  # noqa: N802, PLR0913
         """Overrides the drawItemText method to remove the Nuke dropdown shadow."""
         if text_role == QtGui.QPalette.Text:
             pal.setColor(QtGui.QPalette.Text, pal.color(QtGui.QPalette.WindowText))

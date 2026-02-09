@@ -5,7 +5,7 @@ Written by Mervin van Brakel, 2024."""
 import json
 from typing import List
 
-from PySide2 import QtCore, QtNetwork
+from PySide6 import QtCore, QtNetwork
 
 from node_mailer.data_models import (
     NodeMailerClient,

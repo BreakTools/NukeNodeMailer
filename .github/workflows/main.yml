@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  attach-zip:
+  attach-zip-pyside6:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,10 +27,43 @@ jobs:
           cp -r node_mailer NukeNodeMailer/
           cp menu.py NukeNodeMailer/
           cp installation/* .
-          zip -r NukeNodeMailer.zip NukeNodeMailer installation_instructions.txt menu.py
+          zip -r Nuke16+_NodeMailer.zip NukeNodeMailer installation_instructions.txt menu.py
 
       - name: Upload ZIP to release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: NukeNodeMailer.zip
+          files: Nuke16+_NodeMailer.zip
+
+  attach-zip-PySide6:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Replace PySide6 with PySide6 across repository
+        run: |
+          find . -type f \
+            -not -path "./.git/*" \
+            -not -path "./.github/*" \
+            -print0 | xargs -0 sed -i 's/PySide6/PySide6/g'
+
+      - name: Replace [VERSION_NUMBER] with release name in about screen
+        run: |
+          RELEASE_NAME="${{ github.event.release.name }}"
+          sed -i "s/\[VERSION_NUMBER\]/$RELEASE_NAME/g" ./node_mailer/user_interface/about.py
+
+      - name: Create release ZIP
+        run: |
+          mkdir -p NukeNodeMailer
+          cp -r node_mailer NukeNodeMailer/
+          cp menu.py NukeNodeMailer/
+          cp installation/* .
+          zip -r Nuke13-15_NodeMailer.zip NukeNodeMailer installation_instructions.txt menu.py
+
+      - name: Upload ZIP to release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: Nuke13-15_NodeMailer.zip

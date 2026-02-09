@@ -2,7 +2,7 @@
 
 import json
 
-from PySide2 import QtCore, QtNetwork
+from PySide6 import QtCore, QtNetwork
 
 from node_mailer.data_models import NodeMailerClient, NodeMailerMail
 from node_mailer.models import constants

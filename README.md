@@ -24,5 +24,6 @@ Received nodes are stored in your history, so you can always reimport nodes you'
 
 ## Installation instructions
 - In the side bar on the right you'll find the Node Mailer releases.
-- Click on the latest one and download the NukeNodeMailer.zip attachment.
-- Unzip it and follow the instructions in installation_instructions.txt!
+- Click on the latest release.
+- Download the Nuke13-15_NodeMailer.zip attachment for Nuke 13-15 or the Nuke16+_NodeMailer.zip if you're on Nuke 16+.
+- Unzip your file and follow the instructions in installation_instructions.txt!

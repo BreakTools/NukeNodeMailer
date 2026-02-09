@@ -3,7 +3,7 @@
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from PySide2 import QtCore, QtGui, QtNetwork
+from PySide6 import QtCore, QtGui, QtNetwork
 
 from node_mailer.data_models import NodeMailerClient
 from node_mailer.models import constants
@@ -15,7 +15,7 @@ def test_get_local_ip_addresses():
 
     discovery = ClientDiscovery()
     with patch(
-        "PySide2.QtNetwork.QNetworkInterface.allAddresses",
+        "PySide6.QtNetwork.QNetworkInterface.allAddresses",
         return_value=[
             QtNetwork.QHostAddress("145.90.27.1"),
             QtNetwork.QHostAddress("127.0.0.1"),
@@ -179,7 +179,8 @@ def test_update_client(freezer):
 def test_data():
     """Tests the data function that is used for displaying text and icons in the UI.
     Wish I could tests if the QIcons are actually displaying the correct image but I'm running
-    into a weird amount of crashes whenever I try to convert them and comparing them as images."""
+    into a weird amount of crashes whenever I try to convert them and comparing them as images.
+    """
     discovery = ClientDiscovery()
     discovery.mailing_clients = [
         NodeMailerClient("test_name", "fake_ip", False, 0),

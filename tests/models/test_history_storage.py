@@ -5,7 +5,7 @@ Written by Mervin van Brakel, 2024."""
 import sqlite3
 from unittest.mock import patch
 
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import MailHistoryRow
@@ -15,7 +15,7 @@ from node_mailer.models.history_storage import HistoryStorage
 def test_get_database_path(tmp_path):
     """Tests the database path is correctly retrieved."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -29,7 +29,7 @@ def test_get_database_connection(tmp_path):
     Situation where database doesn't yet exist is also covered because the get_database_connection
     function is called in the init function of the history storage class."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -41,7 +41,7 @@ def test_get_database_connection(tmp_path):
 def test_create_database(tmp_path):
     """Test to see if the database is created properly if it doesn't exist."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -66,7 +66,7 @@ def test_create_database(tmp_path):
 def test_retrieve_all_mail_from_database(tmp_path):
     """Tests the mail is retrieved from the database and stored in the TableModel"""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -81,7 +81,7 @@ def test_retrieve_all_mail_from_database(tmp_path):
 def test_store_mail(tmp_path):
     """Tests the mail is inserted into database with the TableModel updating accordingly."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -115,7 +115,7 @@ def test_get_plain_text_from_html_string():
 def test_delete_mail(tmp_path):
     """Tests the mail is deleted from the database with the TableModel updating accordingly."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -138,7 +138,7 @@ def test_delete_mail(tmp_path):
 def test_data(tmp_path):
     """Tests the data is correctly retrieved from the database for display in UI."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -166,7 +166,7 @@ def test_data(tmp_path):
 def test_row_count(tmp_path):
     """Tests the row count is correctly retrieved from the database for display in UI."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -180,7 +180,7 @@ def test_row_count(tmp_path):
 def test_column_count(tmp_path):
     """Tests the column count is correctly retrieved from the database for display in UI."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()
@@ -190,7 +190,7 @@ def test_column_count(tmp_path):
 def test_get_mailer_data_from_index(tmp_path):
     """Tests a NodeMailerMessage object can be retrieved from a given index."""
     with patch(
-        "PySide2.QtCore.QStandardPaths.writableLocation",
+        "PySide6.QtCore.QStandardPaths.writableLocation",
         return_value=str(tmp_path),
     ):
         history_storage = HistoryStorage()

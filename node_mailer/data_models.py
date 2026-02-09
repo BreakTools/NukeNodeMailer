@@ -5,7 +5,7 @@ Written by Mervin van Brakel, 2024."""
 import json
 from dataclasses import asdict, dataclass
 
-from PySide2 import QtNetwork
+from PySide6 import QtNetwork
 
 
 @dataclass

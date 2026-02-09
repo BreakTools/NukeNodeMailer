@@ -7,7 +7,7 @@ Written by Mervin van Brakel, 2024.
 
 from pathlib import Path
 
-from PySide2 import QtCore, QtMultimedia
+from PySide6 import QtCore, QtMultimedia
 
 from .models.constants import SettingStrings
 

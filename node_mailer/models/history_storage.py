@@ -6,7 +6,7 @@ import sqlite3
 from pathlib import Path
 from typing import Any, List, Union
 
-from PySide2 import QtCore, QtGui
+from PySide6 import QtCore, QtGui
 
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.constants import MailHistoryRow

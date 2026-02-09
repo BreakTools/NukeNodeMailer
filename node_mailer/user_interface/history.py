@@ -2,7 +2,7 @@
 
 Written by Mervin van Brakel, 2024."""
 
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 
 from node_mailer.data_models import NodeMailerMail
 from node_mailer.models.history_storage import HistoryStorage
