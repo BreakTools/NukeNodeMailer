@@ -35,19 +35,19 @@ jobs:
         with:
           files: Nuke16+_NodeMailer.zip
 
-  attach-zip-PySide6:
+  attach-zip-pyside2:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Replace PySide6 with PySide6 across repository
+      - name: Replace PySide6 with PySide2 across repository
         run: |
           find . -type f \
             -not -path "./.git/*" \
             -not -path "./.github/*" \
-            -print0 | xargs -0 sed -i 's/PySide6/PySide6/g'
+            -print0 | xargs -0 sed -i 's/PySide6/PySide2/g'
 
       - name: Replace [VERSION_NUMBER] with release name in about screen
         run: |
